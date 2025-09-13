@@ -1,0 +1,92 @@
+name: CI
+
+on:
+    push:
+        branches: ["main"]
+        tags: ["v*"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    build-test:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:16
+                ports: ["5432:5432"]
+                env:
+                    POSTGRES_USER: fink
+                    POSTGRES_PASSWORD: fink
+                    POSTGRES_DB: fink
+                options: >-
+                    --health-cmd="pg_isready -U fink -d fink"
+                    --health-interval=5s
+                    --health-timeout=3s
+                    --health-retries=20
+
+        env:
+            # Point app & alembic to CI Postgres
+            DATABASE_URL: postgresql+asyncpg://fink:fink@localhost:5432/fink
+            # Keep tests quiet (no table auto-create at startup in prod mode)
+            ENVIRONMENT: production
+            DEBUG: "false"
+            PYTHONUNBUFFERED: "1"
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install system deps
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends build-essential
+
+            - name: Install Python deps (runtime + dev)
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install \
+                    "fastapi>=0.116.1" \
+                    "uvicorn[standard]>=0.35.0" \
+                    "pydantic-settings>=2.10.1" \
+                    "sqlalchemy>=2.0.43" \
+                    "asyncpg>=0.30.0" \
+                    "alembic>=1.16.5" \
+                    "redis>=6.4.0" \
+                    "httpx>=0.28.1" \
+                    # dev
+                    "ruff>=0.6.9" "black>=24.8.0" "mypy>=1.11.2" \
+                    "pytest>=8.4.2" "pytest-asyncio>=1.1.0" "pytest-cov>=6.0.0" "coverage>=7.6.0"
+
+            - name: Wait for Postgres
+              run: |
+                  for i in {1..60}; do
+                    pg_isready -h localhost -p 5432 -U fink -d fink && break
+                    sleep 1
+                  done
+
+            - name: Lint (Ruff)
+              run: ruff check app
+
+            - name: Format check (Black)
+              run: black --check app
+
+            - name: Type check (MyPy)
+              run: mypy app
+
+            - name: Alembic upgrade
+              run: alembic upgrade head
+
+            - name: Tests (Pytest)
+              run: pytest -q --cov=app --cov-report=xml
+
+            - name: Upload coverage artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: coverage-xml
+                  path: coverage.xml

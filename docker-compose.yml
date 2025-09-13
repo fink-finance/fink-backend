@@ -1,0 +1,62 @@
+services:
+    postgres:
+        image: postgres:16
+        container_name: fink_pg
+        environment:
+            POSTGRES_USER: fink
+            POSTGRES_PASSWORD: fink
+            POSTGRES_DB: fink
+        ports:
+            - "5432:5432"
+        volumes:
+            - fink_pg:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U fink -d fink"]
+            interval: 5s
+            timeout: 3s
+            retries: 20
+        restart: unless-stopped
+
+    redis:
+        image: redis:7
+        container_name: fink_redis
+        ports:
+            - "6379:6379"
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 20
+        restart: unless-stopped
+
+    api:
+        build: .
+        container_name: fink_api
+        env_file: .env
+        ports:
+            - "8000:8000"
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        command:
+            [
+                "python",
+                "-m",
+                "uvicorn",
+                "app.main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000",
+                "--reload",
+                "--reload-dir",
+                "app",
+            ]
+        volumes:
+            - .:/app
+        restart: unless-stopped
+
+volumes:
+    fink_pg:

@@ -1,19 +1,7 @@
 version: 2
 updates:
-    # Enable version updates for Python dependencies
-    - package-ecosystem: "pip"
-      directory: "/"
-      schedule:
-          interval: "weekly"
-          day: "monday"
-          time: "09:00"
-      open-pull-requests-limit: 10
-      reviewers:
-          - "brunoribeirol"
-      assignees:
-          - "brunoribeirol"
-
-    # Enable version updates for GitHub Actions
+    # Enable version updates for GitHub Actions only
+    # Note: Python dependencies are managed by Poetry, not pip
     - package-ecosystem: "github-actions"
       directory: "/"
       schedule:

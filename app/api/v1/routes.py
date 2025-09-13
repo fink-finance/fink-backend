@@ -11,7 +11,7 @@ from app.core.settings import settings
 api_router = APIRouter()
 
 
-@api_router.get("/health")  # type: ignore[misc]
+@api_router.get("/health")
 async def health() -> dict[str, Any]:
     """Health check for API versioned router."""
     return {
@@ -21,7 +21,7 @@ async def health() -> dict[str, Any]:
     }
 
 
-@api_router.get("/info")  # type: ignore[misc]
+@api_router.get("/info")
 async def info() -> dict[str, Any]:
     """Static API information for diagnostics."""
     return {

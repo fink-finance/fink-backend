@@ -41,7 +41,7 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-@app.get("/")  # type: ignore[misc]
+@app.get("/")
 async def root() -> dict[str, Any]:
     """Return basic app metadata for quick inspection."""
     return {
@@ -51,7 +51,7 @@ async def root() -> dict[str, Any]:
     }
 
 
-@app.get("/health")  # type: ignore[misc]
+@app.get("/health")
 async def health_check() -> dict[str, Any]:
     """Liveness probe endpoint used by containers and load balancers."""
     return {"status": "healthy", "service": settings.app_name}

@@ -1,1 +1,0 @@
-"""Module transaction_repository."""

@@ -12,8 +12,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.db.base import Base  # noqa
-from app.db import models  # noqa: F401
+from app.shared.database import Base  # noqa
+from app.shared import models_imports  # noqa: F401
 
 target_metadata = Base.metadata
 

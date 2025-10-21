@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.routes import api_router
 from app.core.settings import settings
-from app.db.session import init_db
+from app.shared.database import init_db
 
 
 @asynccontextmanager

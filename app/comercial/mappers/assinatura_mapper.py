@@ -35,3 +35,4 @@ def update_orm_from_model(orm: AssinaturaORM, model: Assinatura) -> AssinaturaOR
     orm.termina_em = model.termina_em
     orm.status = model.status
     return orm
+#

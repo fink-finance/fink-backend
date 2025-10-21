@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
-
 from app.domain.models.identidade.pessoa import Pessoa
 from app.persistence.db.identidade.pessoa_orm import PessoaORM
 

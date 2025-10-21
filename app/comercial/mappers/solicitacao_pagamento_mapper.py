@@ -5,6 +5,7 @@ from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagam
 
 
 def orm_to_model(orm: SolicitacaoPagamentoORM) -> SolicitacaoPagamento:
+    """Converte SolicitacaoPagamentoORM (persistence) para SolicitacaoPagamento (domain)."""
     return SolicitacaoPagamento(
         id_solicitacao=orm.id_solicitacao,
         fk_tipo_pagamento_id_pagamento=orm.fk_tipo_pagamento_id_pagamento,
@@ -14,6 +15,7 @@ def orm_to_model(orm: SolicitacaoPagamentoORM) -> SolicitacaoPagamento:
 
 
 def model_to_orm_new(model: SolicitacaoPagamento) -> SolicitacaoPagamentoORM:
+    """Cria nova instância de SolicitacaoPagamentoORM a partir de SolicitacaoPagamento (domain)."""
     return SolicitacaoPagamentoORM(
         id_solicitacao=model.id_solicitacao,
         fk_tipo_pagamento_id_pagamento=model.fk_tipo_pagamento_id_pagamento,
@@ -23,6 +25,7 @@ def model_to_orm_new(model: SolicitacaoPagamento) -> SolicitacaoPagamentoORM:
 
 
 def update_orm_from_model(orm: SolicitacaoPagamentoORM, model: SolicitacaoPagamento) -> SolicitacaoPagamentoORM:
+    """Atualiza instância de SolicitacaoPagamentoORM existente com dados de SolicitacaoPagamento (domain)."""
     orm.fk_tipo_pagamento_id_pagamento = model.fk_tipo_pagamento_id_pagamento
     orm.fk_assinatura_id_assinatura = model.fk_assinatura_id_assinatura
     orm.data_hora = model.data_hora

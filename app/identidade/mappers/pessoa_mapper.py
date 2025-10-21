@@ -7,6 +7,7 @@ from app.identidade.persistence.pessoa_orm import PessoaORM
 
 
 def orm_to_model(orm: PessoaORM) -> Pessoa:
+    """Converte PessoaORM (persistence) para Pessoa (domain)."""
     return Pessoa(
         id_pessoa=orm.id_pessoa,
         email=orm.email,
@@ -26,6 +27,7 @@ def orm_to_model(orm: PessoaORM) -> Pessoa:
 
 
 def model_to_orm_new(model: Pessoa) -> PessoaORM:
+    """Cria nova instância de PessoaORM a partir de Pessoa (domain)."""
     return PessoaORM(
         id_pessoa=model.id_pessoa,
         email=model.email,
@@ -45,6 +47,7 @@ def model_to_orm_new(model: Pessoa) -> PessoaORM:
 
 
 def update_orm_from_model(orm: PessoaORM, model: Pessoa) -> PessoaORM:
+    """Atualiza instância de PessoaORM existente com dados de Pessoa (domain)."""
     orm.email = model.email
     orm.senha = model.senha
     orm.nome = model.nome

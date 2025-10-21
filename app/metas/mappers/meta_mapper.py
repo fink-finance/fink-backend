@@ -7,6 +7,7 @@ from app.metas.persistence.meta_orm import MetaORM
 
 
 def orm_to_model(orm: MetaORM) -> Meta:
+    """Converte MetaORM (persistence) para Meta (domain)."""
     return Meta(
         id_meta=orm.id_meta,
         fk_pessoa_id_pessoa=orm.fk_pessoa_id_pessoa,
@@ -21,6 +22,7 @@ def orm_to_model(orm: MetaORM) -> Meta:
 
 
 def model_to_orm_new(model: Meta) -> MetaORM:
+    """Cria nova instância de MetaORM a partir de Meta (domain)."""
     return MetaORM(
         id_meta=model.id_meta,
         fk_pessoa_id_pessoa=model.fk_pessoa_id_pessoa,
@@ -35,6 +37,7 @@ def model_to_orm_new(model: Meta) -> MetaORM:
 
 
 def update_orm_from_model(orm: MetaORM, model: Meta) -> MetaORM:
+    """Atualiza instância de MetaORM existente com dados de Meta (domain)."""
     orm.fk_pessoa_id_pessoa = model.fk_pessoa_id_pessoa
     orm.titulo = model.titulo
     orm.descricao = model.descricao

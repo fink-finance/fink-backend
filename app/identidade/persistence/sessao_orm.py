@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.shared.database import Base
 
 if TYPE_CHECKING:
@@ -24,7 +25,7 @@ class SessaoORM(Base):
     criada_em: Mapped[date] = mapped_column(Date, nullable=False)
     expira_em: Mapped[date] = mapped_column(Date, nullable=False)
 
-    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="sessoes")
+    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="sessoes")
 
     def __repr__(self) -> str:
         return f"<SessaoORM id={self.id_sessao} token={self.token_hash[:10]}...>"

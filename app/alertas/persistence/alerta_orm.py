@@ -4,7 +4,9 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.shared.database import Base
+
 #
 if TYPE_CHECKING:
     from app.identidade.persistence.pessoa_orm import PessoaORM
@@ -28,8 +30,8 @@ class AlertaORM(Base):
         Integer, ForeignKey("meta.id_meta", ondelete="SET NULL"), nullable=True
     )
 
-    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="alertas")
-    meta: Mapped["MetaORM | None"] = relationship("MetaORM", back_populates="alertas")
+    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="alertas")
+    meta: Mapped[MetaORM | None] = relationship("MetaORM", back_populates="alertas")
 
     def __repr__(self) -> str:
         return f"<AlertaORM id={self.id_alerta} parametro={self.parametro} acao={self.acao} valor={self.valor}>"

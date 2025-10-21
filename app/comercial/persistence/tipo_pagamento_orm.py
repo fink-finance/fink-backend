@@ -1,11 +1,15 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.shared.database import Base
 
 if TYPE_CHECKING:
     from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagamentoORM
+
 
 class TipoPagamentoORM(Base):
     __tablename__ = "tipo_pagamento"
@@ -14,7 +18,7 @@ class TipoPagamentoORM(Base):
     tipo_pagamento: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
     # 1 TipoPagamento -> N SolicitacoesPagamento
-    solicitacoes: Mapped[list["SolicitacaoPagamentoORM"]] = relationship(
+    solicitacoes: Mapped[list[SolicitacaoPagamentoORM]] = relationship(
         "SolicitacaoPagamentoORM", back_populates="tipo_pagamento"
     )
 

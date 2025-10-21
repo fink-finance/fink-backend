@@ -7,6 +7,7 @@ from app.comercial.persistence.plano_orm import PlanoORM
 
 
 def orm_to_model(orm: PlanoORM) -> Plano:
+    """Converte PlanoORM (persistence) para Plano (domain)."""
     return Plano(
         id_plano=orm.id_plano,
         titulo=orm.titulo,
@@ -18,6 +19,7 @@ def orm_to_model(orm: PlanoORM) -> Plano:
 
 
 def model_to_orm_new(model: Plano) -> PlanoORM:
+    """Cria nova instância de PlanoORM a partir de Plano (domain)."""
     return PlanoORM(
         id_plano=model.id_plano,
         titulo=model.titulo,
@@ -29,6 +31,7 @@ def model_to_orm_new(model: Plano) -> PlanoORM:
 
 
 def update_orm_from_model(orm: PlanoORM, model: Plano) -> PlanoORM:
+    """Atualiza instância de PlanoORM existente com dados de Plano (domain)."""
     orm.titulo = model.titulo
     orm.descricao = model.descricao
     orm.preco = model.preco

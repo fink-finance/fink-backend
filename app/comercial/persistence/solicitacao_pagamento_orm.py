@@ -1,16 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
-
-if TYPE_CHECKING:
-    from app.comercial.persistence.assinatura_orm import AssinaturaORM
-    from app.comercial.persistence.tipo_pagamento_orm import TipoPagamentoORM
 
 
 class SolicitacaoPagamentoORM(Base):
@@ -34,8 +29,8 @@ class SolicitacaoPagamentoORM(Base):
 
     data_hora: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    tipo_pagamento: Mapped[TipoPagamentoORM] = relationship("TipoPagamentoORM", back_populates="solicitacoes")
-    assinatura: Mapped[AssinaturaORM] = relationship(
+    tipo_pagamento: Mapped["TipoPagamentoORM"] = relationship("TipoPagamentoORM", back_populates="solicitacoes")
+    assinatura: Mapped["AssinaturaORM"] = relationship(
         "AssinaturaORM", back_populates="solicitacao_pagamento", uselist=False
     )
 

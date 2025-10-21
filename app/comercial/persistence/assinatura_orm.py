@@ -1,17 +1,11 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
-
-if TYPE_CHECKING:
-    from app.comercial.persistence.plano_orm import PlanoORM
-    from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagamentoORM
-    from app.identidade.persistence.pessoa_orm import PessoaORM
 
 
 class AssinaturaORM(Base):
@@ -30,9 +24,9 @@ class AssinaturaORM(Base):
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
 
-    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="assinaturas")
-    plano: Mapped[PlanoORM] = relationship("PlanoORM", back_populates="assinaturas")
-    solicitacao_pagamento: Mapped[SolicitacaoPagamentoORM | None] = relationship(
+    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="assinaturas")
+    plano: Mapped["PlanoORM"] = relationship("PlanoORM", back_populates="assinaturas")
+    solicitacao_pagamento: Mapped["SolicitacaoPagamentoORM | None"] = relationship(
         "SolicitacaoPagamentoORM", back_populates="assinatura", uselist=False
     )
 

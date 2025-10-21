@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import TYPE_CHECKING
 
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
-
-if TYPE_CHECKING:
-    from app.identidade.persistence.pessoa_orm import PessoaORM
 
 
 class SessaoORM(Base):

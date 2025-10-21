@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from sqlalchemy import Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
-
-if TYPE_CHECKING:
-    from app.comercial.persistence.assinatura_orm import AssinaturaORM
 
 
 class PlanoORM(Base):
@@ -22,7 +17,7 @@ class PlanoORM(Base):
     status: Mapped[str] = mapped_column(String, nullable=False)
 
     # 1 Plano -> N Assinaturas
-    assinaturas: Mapped[list[AssinaturaORM]] = relationship(
+    assinaturas: Mapped[list["AssinaturaORM"]] = relationship(
         "AssinaturaORM", back_populates="plano", cascade="all, delete-orphan", passive_deletes=True
     )
 

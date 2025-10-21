@@ -16,9 +16,7 @@ class MetaRepositoryImpl(MetaRepository):
 
     async def list_by_pessoa(self, id_pessoa: int) -> list[MetaORM]:
         """Lista todas as metas de uma pessoa."""
-        result = await self.session.execute(
-            select(MetaORM).where(MetaORM.fk_pessoa_id_pessoa == id_pessoa)
-        )
+        result = await self.session.execute(select(MetaORM).where(MetaORM.fk_pessoa_id_pessoa == id_pessoa))
         return result.scalars().all()
 
     async def list_all(self) -> list[MetaORM]:
@@ -40,6 +38,4 @@ class MetaRepositoryImpl(MetaRepository):
 
     async def delete(self, id_meta: int) -> None:
         """Remove uma meta pelo ID."""
-        await self.session.execute(
-            delete(MetaORM).where(MetaORM.id_meta == id_meta)
-        )
+        await self.session.execute(delete(MetaORM).where(MetaORM.id_meta == id_meta))

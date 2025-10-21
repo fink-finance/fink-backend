@@ -34,6 +34,4 @@ class TipoPagamentoRepositoryImpl(TipoPagamentoRepository):
 
     async def delete(self, id_pagamento: int) -> None:
         """Remove um tipo de pagamento pelo ID."""
-        await self.session.execute(
-            delete(TipoPagamentoORM).where(TipoPagamentoORM.id_pagamento == id_pagamento)
-        )
+        await self.session.execute(delete(TipoPagamentoORM).where(TipoPagamentoORM.id_pagamento == id_pagamento))

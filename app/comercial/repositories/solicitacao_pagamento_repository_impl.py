@@ -17,9 +17,7 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
     async def list_by_assinatura(self, id_assinatura: int) -> list[SolicitacaoPagamentoORM]:
         """Lista solicitações relacionadas a uma assinatura."""
         result = await self.session.execute(
-            select(SolicitacaoPagamentoORM).where(
-                SolicitacaoPagamentoORM.fk_assinatura_id_assinatura == id_assinatura
-            )
+            select(SolicitacaoPagamentoORM).where(SolicitacaoPagamentoORM.fk_assinatura_id_assinatura == id_assinatura)
         )
         return result.scalars().all()
 
@@ -43,7 +41,5 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
     async def delete(self, id_solicitacao: int) -> None:
         """Remove uma solicitação de pagamento pelo ID."""
         await self.session.execute(
-            delete(SolicitacaoPagamentoORM).where(
-                SolicitacaoPagamentoORM.id_solicitacao == id_solicitacao
-            )
+            delete(SolicitacaoPagamentoORM).where(SolicitacaoPagamentoORM.id_solicitacao == id_solicitacao)
         )

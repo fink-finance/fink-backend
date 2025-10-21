@@ -16,16 +16,12 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
 
     async def list_by_pessoa(self, id_pessoa: int) -> list[AssinaturaORM]:
         """Lista todas as assinaturas de uma pessoa."""
-        result = await self.session.execute(
-            select(AssinaturaORM).where(AssinaturaORM.fk_pessoa_id_pessoa == id_pessoa)
-        )
+        result = await self.session.execute(select(AssinaturaORM).where(AssinaturaORM.fk_pessoa_id_pessoa == id_pessoa))
         return result.scalars().all()
 
     async def list_by_plano(self, id_plano: int) -> list[AssinaturaORM]:
         """Lista todas as assinaturas de um plano específico."""
-        result = await self.session.execute(
-            select(AssinaturaORM).where(AssinaturaORM.fk_plano_id_plano == id_plano)
-        )
+        result = await self.session.execute(select(AssinaturaORM).where(AssinaturaORM.fk_plano_id_plano == id_plano))
         return result.scalars().all()
 
     async def list_all(self) -> list[AssinaturaORM]:
@@ -47,6 +43,4 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
 
     async def delete(self, id_assinatura: int) -> None:
         """Remove uma assinatura pelo ID."""
-        await self.session.execute(
-            delete(AssinaturaORM).where(AssinaturaORM.id_assinatura == id_assinatura)
-        )
+        await self.session.execute(delete(AssinaturaORM).where(AssinaturaORM.id_assinatura == id_assinatura))

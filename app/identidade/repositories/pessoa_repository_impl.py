@@ -16,9 +16,7 @@ class PessoaRepositoryImpl(PessoaRepository):
 
     async def get_by_email(self, email: str) -> PessoaORM | None:
         """Busca uma pessoa pelo email."""
-        result = await self.session.execute(
-            select(PessoaORM).where(PessoaORM.email == email)
-        )
+        result = await self.session.execute(select(PessoaORM).where(PessoaORM.email == email))
         return result.scalar_one_or_none()
 
     async def list_all(self) -> list[PessoaORM]:
@@ -34,6 +32,4 @@ class PessoaRepositoryImpl(PessoaRepository):
 
     async def delete(self, id_pessoa: int) -> None:
         """Remove uma pessoa pelo ID."""
-        await self.session.execute(
-            delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa)
-        )
+        await self.session.execute(delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa))

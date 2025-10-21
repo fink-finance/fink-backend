@@ -16,9 +16,7 @@ class PlanoRepositoryImpl(PlanoRepository):
 
     async def get_by_titulo(self, titulo: str) -> PlanoORM | None:
         """Busca um plano pelo título."""
-        result = await self.session.execute(
-            select(PlanoORM).where(PlanoORM.titulo == titulo)
-        )
+        result = await self.session.execute(select(PlanoORM).where(PlanoORM.titulo == titulo))
         return result.scalar_one_or_none()
 
     async def list_all(self) -> list[PlanoORM]:
@@ -40,6 +38,4 @@ class PlanoRepositoryImpl(PlanoRepository):
 
     async def delete(self, id_plano: int) -> None:
         """Remove um plano pelo ID."""
-        await self.session.execute(
-            delete(PlanoORM).where(PlanoORM.id_plano == id_plano)
-        )
+        await self.session.execute(delete(PlanoORM).where(PlanoORM.id_plano == id_plano))

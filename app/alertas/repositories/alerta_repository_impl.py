@@ -16,16 +16,12 @@ class AlertaRepositoryImpl(AlertaRepository):
 
     async def list_by_pessoa(self, id_pessoa: int) -> list[AlertaORM]:
         """Lista todos os alertas de uma pessoa específica."""
-        result = await self.session.execute(
-            select(AlertaORM).where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa)
-        )
+        result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa))
         return result.scalars().all()
 
     async def list_by_meta(self, id_meta: int) -> list[AlertaORM]:
         """Lista todos os alertas relacionados a uma meta."""
-        result = await self.session.execute(
-            select(AlertaORM).where(AlertaORM.fk_meta_id_meta == id_meta)
-        )
+        result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_meta_id_meta == id_meta))
         return result.scalars().all()
 
     async def list_all(self) -> list[AlertaORM]:
@@ -47,6 +43,4 @@ class AlertaRepositoryImpl(AlertaRepository):
 
     async def delete(self, id_alerta: int) -> None:
         """Remove um alerta pelo ID."""
-        await self.session.execute(
-            delete(AlertaORM).where(AlertaORM.id_alerta == id_alerta)
-        )
+        await self.session.execute(delete(AlertaORM).where(AlertaORM.id_alerta == id_alerta))

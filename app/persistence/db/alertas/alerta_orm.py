@@ -30,7 +30,7 @@ class AlertaORM(Base):
     )
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="alertas")
-    meta: Mapped["MetaORM"] | None = relationship("MetaORM", back_populates="alertas")
+    meta: Mapped["MetaORM | None"] = relationship("MetaORM", back_populates="alertas")
 
     def __repr__(self) -> str:
         return f"<AlertaORM id={self.id_alerta} parametro={self.parametro} acao={self.acao} valor={self.valor}>"

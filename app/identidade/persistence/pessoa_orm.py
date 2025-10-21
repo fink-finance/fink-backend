@@ -1,6 +1,8 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import date
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, Date, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.shared.database import Base

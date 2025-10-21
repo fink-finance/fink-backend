@@ -1,11 +1,14 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from sqlalchemy import Integer, String, Float
+
+from sqlalchemy import Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.shared.database import Base
 
 if TYPE_CHECKING:
     from app.comercial.persistence.assinatura_orm import AssinaturaORM
+
 
 class PlanoORM(Base):
     __tablename__ = "plano"

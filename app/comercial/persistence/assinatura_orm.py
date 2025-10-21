@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import date
-from sqlalchemy import Integer, String, Date, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.shared.database import Base
 
@@ -33,4 +35,6 @@ class AssinaturaORM(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<AssinaturaORM id={self.id_assinatura} pessoa={self.fk_pessoa_id_pessoa} plano={self.fk_plano_id_plano}>"
+        return (
+            f"<AssinaturaORM id={self.id_assinatura} pessoa={self.fk_pessoa_id_pessoa} plano={self.fk_plano_id_plano}>"
+        )

@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from sqlalchemy import Integer, String, Float, ForeignKey
+
+from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.shared.database import Base
 #
 if TYPE_CHECKING:
     from app.identidade.persistence.pessoa_orm import PessoaORM
     from app.metas.persistence.meta_orm import MetaORM
+
 
 class AlertaORM(Base):
     __tablename__ = "alerta"

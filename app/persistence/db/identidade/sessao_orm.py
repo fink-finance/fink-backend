@@ -1,12 +1,16 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import date
-from sqlalchemy import Integer, String, Date, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.persistence.db.identidade.pessoa_orm import PessoaORM
+
 
 class SessaoORM(Base):
     __tablename__ = "sessao"
@@ -21,7 +25,7 @@ class SessaoORM(Base):
     criada_em: Mapped[date] = mapped_column(Date, nullable=False)
     expira_em: Mapped[date] = mapped_column(Date, nullable=False)
 
-    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="sessoes")
+    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="sessoes")
 
     def __repr__(self) -> str:
         return f"<SessaoORM id={self.id_sessao} token={self.token_hash[:10]}...>"

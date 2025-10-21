@@ -1,13 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import date
-from sqlalchemy import Integer, String, Date, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.persistence.db.identidade.pessoa_orm import PessoaORM
     from app.persistence.db.comercial.plano_orm import PlanoORM
+    from app.persistence.db.identidade.pessoa_orm import PessoaORM
+
 
 class AssinaturaORM(Base):
     __tablename__ = "assinatura"
@@ -25,8 +29,10 @@ class AssinaturaORM(Base):
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
 
-    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="assinaturas")
-    plano: Mapped["PlanoORM"] = relationship("PlanoORM", back_populates="assinaturas")
+    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="assinaturas")
+    plano: Mapped[PlanoORM] = relationship("PlanoORM", back_populates="assinaturas")
 
     def __repr__(self) -> str:
-        return f"<AssinaturaORM id={self.id_assinatura} pessoa={self.fk_pessoa_id_pessoa} plano={self.fk_plano_id_plano}>"
+        return (
+            f"<AssinaturaORM id={self.id_assinatura} pessoa={self.fk_pessoa_id_pessoa} plano={self.fk_plano_id_plano}>"
+        )

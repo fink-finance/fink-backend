@@ -1,19 +1,21 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import datetime
-from sqlalchemy import Integer, DateTime, ForeignKey, UniqueConstraint
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.persistence.db.comercial.assinatura_orm import AssinaturaORM
     from app.persistence.db.comercial.tipo_pagamento_orm import TipoPagamentoORM
 
+
 class SolicitacaoPagamentoORM(Base):
     __tablename__ = "solicitacao_pagamento"
-    __table_args__ = (
-        UniqueConstraint("fk_assinatura_id_assinatura", name="uq_solicitacao_por_assinatura"),
-    )
+    __table_args__ = (UniqueConstraint("fk_assinatura_id_assinatura", name="uq_solicitacao_por_assinatura"),)
 
     id_solicitacao: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
@@ -32,10 +34,8 @@ class SolicitacaoPagamentoORM(Base):
 
     data_hora: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    tipo_pagamento: Mapped["TipoPagamentoORM"] = relationship(
-        "TipoPagamentoORM", back_populates="solicitacoes"
-    )
-    assinatura: Mapped["AssinaturaORM"] = relationship(
+    tipo_pagamento: Mapped[TipoPagamentoORM] = relationship("TipoPagamentoORM", back_populates="solicitacoes")
+    assinatura: Mapped[AssinaturaORM] = relationship(
         "AssinaturaORM", back_populates="solicitacao_pagamento", uselist=False
     )
 

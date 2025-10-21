@@ -1,13 +1,17 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from datetime import date
-from sqlalchemy import Integer, String, Float, Date, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
 
 if TYPE_CHECKING:
-    from app.persistence.db.identidade.pessoa_orm import PessoaORM
     from app.persistence.db.alertas.alerta_orm import AlertaORM
+    from app.persistence.db.identidade.pessoa_orm import PessoaORM
+
 
 class MetaORM(Base):
     __tablename__ = "meta"
@@ -26,11 +30,9 @@ class MetaORM(Base):
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
 
-    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="metas")
+    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="metas")
 
-    alertas: Mapped[list["AlertaORM"]] = relationship(
-        "AlertaORM", back_populates="meta", passive_deletes=True
-    )
+    alertas: Mapped[list[AlertaORM]] = relationship("AlertaORM", back_populates="meta", passive_deletes=True)
 
     def __repr__(self) -> str:
         return f"<MetaORM id={self.id_meta} titulo={self.titulo}>"

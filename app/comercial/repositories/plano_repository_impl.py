@@ -25,7 +25,7 @@ class PlanoRepositoryImpl(PlanoRepository):
     async def list_all(self) -> list[PlanoORM]:
         """Lista todos os planos disponíveis."""
         result = await self.session.execute(select(PlanoORM))
-        return result.scalars().all()
+        return list(result.scalars())  # <- lista real (evita Sequence)
 
     async def add(self, plano: PlanoORM) -> PlanoORM:
         """Adiciona um novo plano ao banco."""

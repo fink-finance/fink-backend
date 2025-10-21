@@ -40,7 +40,9 @@ def run_migrations_offline() -> None:
 
 def _run_sync_migrations(connection: Connection) -> None:
     """Bridge sync migration runner for async engine connections."""
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    context.configure(
+        connection=connection, target_metadata=target_metadata, compare_type=True
+    )
     with context.begin_transaction():
         context.run_migrations()
 

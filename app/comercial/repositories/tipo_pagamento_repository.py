@@ -1,4 +1,7 @@
-from typing import Protocol, Iterable
+from __future__ import annotations
+
+from typing import Protocol
+from collections.abc import Iterable  # <- troque aqui
 from app.comercial.persistence.tipo_pagamento_orm import TipoPagamentoORM
 
 

@@ -4,7 +4,9 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagamentoORM
-from app.comercial.repositories.solicitacao_pagamento_repository import SolicitacaoPagamentoRepository
+from app.comercial.repositories.solicitacao_pagamento_repository import (
+    SolicitacaoPagamentoRepository,
+)
 
 
 class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
@@ -22,19 +24,18 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
         result = await self.session.execute(
             select(SolicitacaoPagamentoORM).where(SolicitacaoPagamentoORM.fk_assinatura_id_assinatura == id_assinatura)
         )
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def list_all(self) -> list[SolicitacaoPagamentoORM]:
         """Lista todas as solicitações de pagamento."""
         result = await self.session.execute(select(SolicitacaoPagamentoORM))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def add(self, solicitacao: SolicitacaoPagamentoORM) -> SolicitacaoPagamentoORM:
         """Adiciona uma nova solicitação."""
         self.session.add(solicitacao)
         await self.session.flush()
-        # opcional: materializar id/defaults
-        # await self.session.refresh(solicitacao)
+        # opcional: await self.session.refresh(solicitacao)
         return solicitacao
 
     async def update(self, solicitacao: SolicitacaoPagamentoORM) -> SolicitacaoPagamentoORM:

@@ -1,4 +1,7 @@
-from typing import Protocol, Iterable
+from __future__ import annotations
+
+from typing import Protocol
+from collections.abc import Iterable  # <- aqui
 from app.identidade.persistence.pessoa_orm import PessoaORM
 
 

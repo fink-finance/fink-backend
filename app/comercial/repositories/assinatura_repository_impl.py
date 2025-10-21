@@ -20,24 +20,22 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
     async def list_by_pessoa(self, id_pessoa: int) -> list[AssinaturaORM]:
         """Lista todas as assinaturas de uma pessoa."""
         result = await self.session.execute(select(AssinaturaORM).where(AssinaturaORM.fk_pessoa_id_pessoa == id_pessoa))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def list_by_plano(self, id_plano: int) -> list[AssinaturaORM]:
         """Lista todas as assinaturas de um plano específico."""
         result = await self.session.execute(select(AssinaturaORM).where(AssinaturaORM.fk_plano_id_plano == id_plano))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def list_all(self) -> list[AssinaturaORM]:
         """Lista todas as assinaturas cadastradas."""
         result = await self.session.execute(select(AssinaturaORM))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def add(self, assinatura: AssinaturaORM) -> AssinaturaORM:
         """Cria uma nova assinatura."""
         self.session.add(assinatura)
         await self.session.flush()
-        # opcional: garantir id e defaults do DB materializados
-        # await self.session.refresh(assinatura)
         return assinatura
 
     async def update(self, assinatura: AssinaturaORM) -> AssinaturaORM:

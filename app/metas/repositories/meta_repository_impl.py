@@ -20,12 +20,12 @@ class MetaRepositoryImpl(MetaRepository):
     async def list_by_pessoa(self, id_pessoa: int) -> list[MetaORM]:
         """Lista todas as metas de uma pessoa."""
         result = await self.session.execute(select(MetaORM).where(MetaORM.fk_pessoa_id_pessoa == id_pessoa))
-        return result.scalars().all()
+        return list(result.scalars())  # <- lista real
 
     async def list_all(self) -> list[MetaORM]:
         """Lista todas as metas cadastradas."""
         result = await self.session.execute(select(MetaORM))
-        return result.scalars().all()
+        return list(result.scalars())  # <- lista real
 
     async def add(self, meta: MetaORM) -> MetaORM:
         """Adiciona uma nova meta."""

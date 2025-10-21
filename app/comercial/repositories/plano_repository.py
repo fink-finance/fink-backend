@@ -1,4 +1,7 @@
-from typing import Protocol, Iterable
+from __future__ import annotations
+
+from typing import Protocol
+from collections.abc import Iterable  # <- usar daqui
 from app.comercial.persistence.plano_orm import PlanoORM
 
 

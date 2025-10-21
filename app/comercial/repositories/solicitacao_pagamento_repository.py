@@ -1,4 +1,7 @@
-from typing import Protocol, Iterable
+from __future__ import annotations
+
+from typing import Protocol
+from collections.abc import Iterable  # <- em vez de typing.Iterable
 from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagamentoORM
 
 

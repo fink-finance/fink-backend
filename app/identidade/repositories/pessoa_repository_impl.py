@@ -25,7 +25,7 @@ class PessoaRepositoryImpl(PessoaRepository):
     async def list_all(self) -> list[PessoaORM]:
         """Lista todas as pessoas cadastradas."""
         result = await self.session.execute(select(PessoaORM))
-        return result.scalars().all()
+        return list(result.scalars())  # <- lista real
 
     async def add(self, pessoa: PessoaORM) -> PessoaORM:
         """Adiciona uma nova pessoa no banco."""

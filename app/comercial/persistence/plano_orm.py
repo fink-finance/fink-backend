@@ -18,7 +18,10 @@ class PlanoORM(Base):
 
     # 1 Plano -> N Assinaturas
     assinaturas: Mapped[list["AssinaturaORM"]] = relationship(
-        "AssinaturaORM", back_populates="plano", cascade="all, delete-orphan", passive_deletes=True
+        "AssinaturaORM",
+        back_populates="plano",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     def __repr__(self) -> str:

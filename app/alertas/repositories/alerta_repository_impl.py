@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.alertas.persistence.alerta_orm import AlertaORM
 from app.alertas.repositories.alerta_repository import AlertaRepository
 
@@ -7,7 +10,7 @@ from app.alertas.repositories.alerta_repository import AlertaRepository
 class AlertaRepositoryImpl(AlertaRepository):
     """Implementação concreta do repositório de Alerta."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_alerta: int) -> AlertaORM | None:
@@ -17,24 +20,22 @@ class AlertaRepositoryImpl(AlertaRepository):
     async def list_by_pessoa(self, id_pessoa: int) -> list[AlertaORM]:
         """Lista todos os alertas de uma pessoa específica."""
         result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def list_by_meta(self, id_meta: int) -> list[AlertaORM]:
         """Lista todos os alertas relacionados a uma meta."""
         result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_meta_id_meta == id_meta))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def list_all(self) -> list[AlertaORM]:
         """Lista todos os alertas cadastrados."""
         result = await self.session.execute(select(AlertaORM))
-        return result.scalars().all()
+        return list(result.scalars())
 
     async def add(self, alerta: AlertaORM) -> AlertaORM:
         """Adiciona um novo alerta."""
         self.session.add(alerta)
         await self.session.flush()
-        # opcional: garantir id/server_defaults carregados
-        # await self.session.refresh(alerta)
         return alerta
 
     async def update(self, alerta: AlertaORM) -> AlertaORM:

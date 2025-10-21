@@ -14,29 +14,24 @@ class TipoPagamentoRepositoryImpl(TipoPagamentoRepository):
         self.session = session
 
     async def get_by_id(self, id_pagamento: int) -> TipoPagamentoORM | None:
-        """Busca um tipo de pagamento pelo ID."""
         return await self.session.get(TipoPagamentoORM, id_pagamento)
 
     async def get_by_tipo(self, tipo_pagamento: str) -> TipoPagamentoORM | None:
-        """Busca um tipo de pagamento pelo nome (ex.: crédito, débito)."""
         result = await self.session.execute(
             select(TipoPagamentoORM).where(TipoPagamentoORM.tipo_pagamento == tipo_pagamento)
         )
         return result.scalar_one_or_none()
 
     async def list_all(self) -> list[TipoPagamentoORM]:
-        """Lista todos os tipos de pagamento disponíveis."""
         result = await self.session.execute(select(TipoPagamentoORM))
-        return result.scalars().all()
+        return list(result.scalars())  # <- muda para list(...)
 
     async def add(self, tipo_pagamento: TipoPagamentoORM) -> TipoPagamentoORM:
-        """Adiciona um novo tipo de pagamento."""
         self.session.add(tipo_pagamento)
         await self.session.flush()
         return tipo_pagamento
 
     async def delete(self, id_pagamento: int) -> None:
-        """Remove um tipo de pagamento pelo ID."""
         await self.session.execute(delete(TipoPagamentoORM).where(TipoPagamentoORM.id_pagamento == id_pagamento))
         await self.session.flush()
 

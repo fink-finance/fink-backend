@@ -28,16 +28,28 @@ class PessoaORM(Base):
 
     # 1 Pessoa -> N Sessões / Metas / Alertas / Assinaturas
     sessoes: Mapped[list["SessaoORM"]] = relationship(
-        "SessaoORM", back_populates="pessoa", cascade="all, delete-orphan", passive_deletes=True
+        "SessaoORM",
+        back_populates="pessoa",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     metas: Mapped[list["MetaORM"]] = relationship(
-        "MetaORM", back_populates="pessoa", cascade="all, delete-orphan", passive_deletes=True
+        "MetaORM",
+        back_populates="pessoa",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     alertas: Mapped[list["AlertaORM"]] = relationship(
-        "AlertaORM", back_populates="pessoa", cascade="all, delete-orphan", passive_deletes=True
+        "AlertaORM",
+        back_populates="pessoa",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
     assinaturas: Mapped[list["AssinaturaORM"]] = relationship(
-        "AssinaturaORM", back_populates="pessoa", cascade="all, delete-orphan", passive_deletes=True
+        "AssinaturaORM",
+        back_populates="pessoa",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     def __repr__(self) -> str:

@@ -39,7 +39,7 @@ async def init_db(create_all: bool = True) -> None:
     if not create_all:
         return
     # Ensure models are imported so mappers are registered
-    from app.db import models  # noqa: F401
+    from app.db import models_imports  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

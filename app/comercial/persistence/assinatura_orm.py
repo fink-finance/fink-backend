@@ -28,7 +28,7 @@ class AssinaturaORM(Base):
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="assinaturas")
     plano: Mapped["PlanoORM"] = relationship("PlanoORM", back_populates="assinaturas")
-    solicitacao_pagamento: Mapped["SolicitacaoPagamentoORM"] | None = relationship(
+    solicitacao_pagamento: Mapped["SolicitacaoPagamentoORM | None"] = relationship(
         "SolicitacaoPagamentoORM", back_populates="assinatura", uselist=False
     )
 

@@ -9,7 +9,7 @@ class SolicitacaoPagamento:
     fk_assinatura_id_assinatura: int
     data_hora: datetime | None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.fk_tipo_pagamento_id_pagamento:
             raise ValueError("Solicitação precisa ter um tipo de pagamento")
         if not self.fk_assinatura_id_assinatura:

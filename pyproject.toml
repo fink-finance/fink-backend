@@ -36,20 +36,25 @@ pre-commit = ">=3.8.0"
 # ---------------- Ruff / Black / Pytest / Mypy ----------------
 
 [tool.ruff]
-line-length = 100
-target-version = "py311"
+line-length = 120
+target-version = "py312"
 exclude = ["migrations"]
 
 [tool.ruff.lint]
-select = ["E","F","W","B","UP","I","C90","D"]
-ignore = ["D104","D105","D107"]
+select = ["E","F","W","B","UP","I","C90","D",]
+ignore = ["D100", "D101", "D104","D105","D107"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.per-file-ignores]
+"app/repositories/**/*_repository.py" = ["D102"]
+"app/persistence/db/**/*.py" = ["UP037"]
+"app/mappers/**/*.py" = ["D103"]
+
 [tool.black]
-line-length = 100
-target-version = ["py311"]
+line-length = 120
+target-version = ["py312"]
 
 [tool.pytest.ini_options]
 addopts = "-q --cov=."

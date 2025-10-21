@@ -33,14 +33,17 @@ class AlertaRepositoryImpl(AlertaRepository):
         """Adiciona um novo alerta."""
         self.session.add(alerta)
         await self.session.flush()
+        # opcional: garantir id/server_defaults carregados
+        # await self.session.refresh(alerta)
         return alerta
 
     async def update(self, alerta: AlertaORM) -> AlertaORM:
         """Atualiza um alerta existente."""
-        await self.session.merge(alerta)
+        merged = await self.session.merge(alerta)
         await self.session.flush()
-        return alerta
+        return merged
 
     async def delete(self, id_alerta: int) -> None:
         """Remove um alerta pelo ID."""
         await self.session.execute(delete(AlertaORM).where(AlertaORM.id_alerta == id_alerta))
+        await self.session.flush()

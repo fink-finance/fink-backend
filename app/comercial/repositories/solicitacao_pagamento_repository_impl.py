@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.comercial.persistence.solicitacao_pagamento_orm import SolicitacaoPagamentoORM
 from app.comercial.repositories.solicitacao_pagamento_repository import SolicitacaoPagamentoRepository
 
@@ -7,7 +10,7 @@ from app.comercial.repositories.solicitacao_pagamento_repository import Solicita
 class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
     """Implementação concreta do repositório de Solicitação de Pagamento."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_solicitacao: int) -> SolicitacaoPagamentoORM | None:
@@ -30,16 +33,19 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
         """Adiciona uma nova solicitação."""
         self.session.add(solicitacao)
         await self.session.flush()
+        # opcional: materializar id/defaults
+        # await self.session.refresh(solicitacao)
         return solicitacao
 
     async def update(self, solicitacao: SolicitacaoPagamentoORM) -> SolicitacaoPagamentoORM:
         """Atualiza uma solicitação existente."""
-        await self.session.merge(solicitacao)
+        merged = await self.session.merge(solicitacao)
         await self.session.flush()
-        return solicitacao
+        return merged
 
     async def delete(self, id_solicitacao: int) -> None:
         """Remove uma solicitação de pagamento pelo ID."""
         await self.session.execute(
             delete(SolicitacaoPagamentoORM).where(SolicitacaoPagamentoORM.id_solicitacao == id_solicitacao)
         )
+        await self.session.flush()

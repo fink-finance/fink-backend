@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.comercial.persistence.plano_orm import PlanoORM
 from app.comercial.repositories.plano_repository import PlanoRepository
 
@@ -7,7 +10,7 @@ from app.comercial.repositories.plano_repository import PlanoRepository
 class PlanoRepositoryImpl(PlanoRepository):
     """Implementação concreta do repositório de Plano."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_plano: int) -> PlanoORM | None:
@@ -28,14 +31,17 @@ class PlanoRepositoryImpl(PlanoRepository):
         """Adiciona um novo plano ao banco."""
         self.session.add(plano)
         await self.session.flush()
+        # opcional: materializar id/defaults
+        # await self.session.refresh(plano)
         return plano
 
     async def update(self, plano: PlanoORM) -> PlanoORM:
         """Atualiza um plano existente."""
-        await self.session.merge(plano)
+        merged = await self.session.merge(plano)
         await self.session.flush()
-        return plano
+        return merged
 
     async def delete(self, id_plano: int) -> None:
         """Remove um plano pelo ID."""
         await self.session.execute(delete(PlanoORM).where(PlanoORM.id_plano == id_plano))
+        await self.session.flush()

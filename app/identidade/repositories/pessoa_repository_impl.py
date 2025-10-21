@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.repositories.pessoa_repository import PessoaRepository
 
@@ -7,7 +10,7 @@ from app.identidade.repositories.pessoa_repository import PessoaRepository
 class PessoaRepositoryImpl(PessoaRepository):
     """Implementação concreta do repositório de Pessoa usando SQLAlchemy."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_pessoa: int) -> PessoaORM | None:
@@ -27,9 +30,10 @@ class PessoaRepositoryImpl(PessoaRepository):
     async def add(self, pessoa: PessoaORM) -> PessoaORM:
         """Adiciona uma nova pessoa no banco."""
         self.session.add(pessoa)
-        await self.session.flush()  # gera o ID no objeto
+        await self.session.flush()
         return pessoa
 
     async def delete(self, id_pessoa: int) -> None:
         """Remove uma pessoa pelo ID."""
         await self.session.execute(delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa))
+        await self.session.flush()

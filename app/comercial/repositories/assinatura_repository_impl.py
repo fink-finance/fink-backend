@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.comercial.persistence.assinatura_orm import AssinaturaORM
 from app.comercial.repositories.assinatura_repository import AssinaturaRepository
 
@@ -7,7 +10,7 @@ from app.comercial.repositories.assinatura_repository import AssinaturaRepositor
 class AssinaturaRepositoryImpl(AssinaturaRepository):
     """Implementação concreta do repositório de Assinatura."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_assinatura: int) -> AssinaturaORM | None:
@@ -33,14 +36,17 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
         """Cria uma nova assinatura."""
         self.session.add(assinatura)
         await self.session.flush()
+        # opcional: garantir id e defaults do DB materializados
+        # await self.session.refresh(assinatura)
         return assinatura
 
     async def update(self, assinatura: AssinaturaORM) -> AssinaturaORM:
         """Atualiza uma assinatura existente."""
-        await self.session.merge(assinatura)
+        merged = await self.session.merge(assinatura)
         await self.session.flush()
-        return assinatura
+        return merged
 
     async def delete(self, id_assinatura: int) -> None:
         """Remove uma assinatura pelo ID."""
         await self.session.execute(delete(AssinaturaORM).where(AssinaturaORM.id_assinatura == id_assinatura))
+        await self.session.flush()

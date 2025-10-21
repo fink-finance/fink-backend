@@ -1,5 +1,8 @@
-from sqlalchemy import select, delete
+from __future__ import annotations
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.metas.persistence.meta_orm import MetaORM
 from app.metas.repositories.meta_repository import MetaRepository
 
@@ -7,7 +10,7 @@ from app.metas.repositories.meta_repository import MetaRepository
 class MetaRepositoryImpl(MetaRepository):
     """Implementação concreta do repositório de Meta."""
 
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
     async def get_by_id(self, id_meta: int) -> MetaORM | None:
@@ -32,10 +35,11 @@ class MetaRepositoryImpl(MetaRepository):
 
     async def update(self, meta: MetaORM) -> MetaORM:
         """Atualiza uma meta existente."""
-        await self.session.merge(meta)
+        merged = await self.session.merge(meta)
         await self.session.flush()
-        return meta
+        return merged
 
     async def delete(self, id_meta: int) -> None:
         """Remove uma meta pelo ID."""
         await self.session.execute(delete(MetaORM).where(MetaORM.id_meta == id_meta))
+        await self.session.flush()

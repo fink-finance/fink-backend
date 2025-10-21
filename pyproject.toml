@@ -49,6 +49,7 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "app/repositories/**/*_repository.py" = ["D102"]
+"app/persistence/db/**/*.py" = ["UP037"]
 
 [tool.black]
 line-length = 120

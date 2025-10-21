@@ -22,7 +22,7 @@ class PlanoORM(Base):
     status: Mapped[str] = mapped_column(String, nullable=False)
 
     # 1 Plano -> N Assinaturas
-    assinaturas: Mapped[list[AssinaturaORM]] = relationship(
+    assinaturas: Mapped[list["AssinaturaORM"]] = relationship(
         "AssinaturaORM", back_populates="plano", cascade="all, delete-orphan", passive_deletes=True
     )
 

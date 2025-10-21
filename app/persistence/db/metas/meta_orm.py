@@ -30,9 +30,8 @@ class MetaORM(Base):
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
 
-    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="metas")
-
-    alertas: Mapped[list[AlertaORM]] = relationship("AlertaORM", back_populates="meta", passive_deletes=True)
+    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="metas")
+    alertas: Mapped[list["AlertaORM"]] = relationship("AlertaORM", back_populates="meta", passive_deletes=True)
 
     def __repr__(self) -> str:
         return f"<MetaORM id={self.id_meta} titulo={self.titulo}>"

@@ -29,8 +29,8 @@ class AssinaturaORM(Base):
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
 
-    pessoa: Mapped[PessoaORM] = relationship("PessoaORM", back_populates="assinaturas")
-    plano: Mapped[PlanoORM] = relationship("PlanoORM", back_populates="assinaturas")
+    pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="assinaturas")
+    plano: Mapped["PlanoORM"] = relationship("PlanoORM", back_populates="assinaturas")
 
     def __repr__(self) -> str:
         return (

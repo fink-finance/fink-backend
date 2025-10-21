@@ -34,8 +34,8 @@ class SolicitacaoPagamentoORM(Base):
 
     data_hora: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    tipo_pagamento: Mapped[TipoPagamentoORM] = relationship("TipoPagamentoORM", back_populates="solicitacoes")
-    assinatura: Mapped[AssinaturaORM] = relationship(
+    tipo_pagamento: Mapped["TipoPagamentoORM"] = relationship("TipoPagamentoORM", back_populates="solicitacoes")
+    assinatura: Mapped["AssinaturaORM"] = relationship(
         "AssinaturaORM", back_populates="solicitacao_pagamento", uselist=False
     )
 

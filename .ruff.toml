@@ -1,0 +1,4 @@
+# Ruff configuration
+[lint]
+# Ignore F821 (undefined name) in ORM files because SQLAlchemy uses string-based relationships
+per-file-ignores = { "app/**/persistence/*_orm.py" = ["F821"] }

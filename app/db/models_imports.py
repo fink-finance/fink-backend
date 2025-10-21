@@ -1,9 +1,0 @@
-# importe TODAS as classes ORM aqui
-from app.persistence.db.alertas.alerta_orm import AlertaORM  # noqa: F401
-from app.persistence.db.comercial.assinatura_orm import AssinaturaORM  # noqa: F401
-from app.persistence.db.comercial.plano_orm import PlanoORM  # noqa: F401
-from app.persistence.db.comercial.solicitacao_pagamento_orm import SolicitacaoPagamentoORM  # noqa: F401
-from app.persistence.db.comercial.tipo_pagamento_orm import TipoPagamentoORM  # noqa: F401
-from app.persistence.db.identidade.pessoa_orm import PessoaORM  # noqa: F401
-from app.persistence.db.identidade.sessao_orm import SessaoORM  # noqa: F401
-from app.persistence.db.metas.meta_orm import MetaORM  # noqa: F401

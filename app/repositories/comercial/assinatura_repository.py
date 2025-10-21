@@ -1,4 +1,6 @@
-from typing import Protocol, Iterable
+from collections.abc import Iterable
+from typing import Protocol
+
 from app.persistence.db.comercial.assinatura_orm import AssinaturaORM
 
 

@@ -47,6 +47,9 @@ ignore = ["D100", "D101", "D104","D105","D107"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.per-file-ignores]
+"app/repositories/**/*_repository.py" = ["D102"]
+
 [tool.black]
 line-length = 120
 target-version = ["py312"]

@@ -43,10 +43,7 @@ class MetaService:
         - 'termina_em' deve ser uma data no futuro
         - 'status' padrão: 'em andamento'
         """
-        obrigatorios = [
-            "fk_pessoa_id_pessoa", "titulo", "descricao",
-            "valor_alvo", "termina_em"
-        ]
+        obrigatorios = ["fk_pessoa_id_pessoa", "titulo", "descricao", "valor_alvo", "termina_em"]
         for campo in obrigatorios:
             if not dados.get(campo):
                 raise ValueError(f"O campo '{campo}' é obrigatório.")

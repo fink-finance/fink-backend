@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.repositories.pessoa_repository import PessoaRepository
 
+
 class PessoaService:
     """Camada de regras de negócio de Pessoa."""
 
@@ -37,8 +38,17 @@ class PessoaService:
         - E-mail deve ser único.
         """
         obrigatorios = [
-            "email", "senha", "nome", "data_nascimento", "telefone",
-            "genero", "estado", "cidade", "rua", "numero", "cep"
+            "email",
+            "senha",
+            "nome",
+            "data_nascimento",
+            "telefone",
+            "genero",
+            "estado",
+            "cidade",
+            "rua",
+            "numero",
+            "cep",
         ]
         for campo in obrigatorios:
             if not dados.get(campo):

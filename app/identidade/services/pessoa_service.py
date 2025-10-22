@@ -2,9 +2,6 @@ from typing import Sequence
 from sqlalchemy.exc import IntegrityError
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.repositories.pessoa_repository import PessoaRepository
-from app.identidade.domain.pessoa import Pessoa  # dataclass
-from datetime import date
-
 
 class PessoaService:
     """Camada de regras de negócio de Pessoa."""

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 from datetime import date
+from decimal import Decimal
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, Float, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, Date, Numeric, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
+
+if TYPE_CHECKING:
+    from app.identidade.persistence.pessoa_orm import PessoaORM
+    from app.alertas.persistence.alerta_orm import AlertaORM
 
 
 class MetaORM(Base):
@@ -17,13 +23,18 @@ class MetaORM(Base):
         Integer, ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
     )
 
-    titulo: Mapped[str] = mapped_column(String, nullable=False)
-    descricao: Mapped[str] = mapped_column(String, nullable=False)
-    valor_alvo: Mapped[float] = mapped_column(Float, nullable=False)
-    valor_atual: Mapped[float] = mapped_column(Float, nullable=False)
-    criada_em: Mapped[date] = mapped_column(Date, nullable=False)
+    titulo: Mapped[str] = mapped_column(String(100), nullable=False)
+    descricao: Mapped[str] = mapped_column(String(500), nullable=False)
+    valor_alvo: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    valor_atual: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, server_default="0")
+    criada_em: Mapped[date] = mapped_column(Date, nullable=False, server_default=func.current_date())
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20),
+        CheckConstraint("status IN ('em_andamento', 'concluida', 'cancelada', 'atrasada')"),
+        nullable=False,
+        server_default="em_andamento",
+    )
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="metas")
     alertas: Mapped[list["AlertaORM"]] = relationship("AlertaORM", back_populates="meta", passive_deletes=True)

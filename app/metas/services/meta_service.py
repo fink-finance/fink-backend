@@ -1,9 +1,11 @@
 from datetime import date
 from decimal import Decimal
+from typing import Any, List
 from sqlalchemy.exc import IntegrityError
 
-from app.metas.persistence.meta_orm import MetaORM
+from app.metas.domain.meta import Meta
 from app.metas.repositories.meta_repository import MetaRepository
+from app.metas.mappers.meta_mapper import orm_to_model, model_to_orm_new
 
 
 class MetaService:
@@ -16,23 +18,24 @@ class MetaService:
     # CRUD principal
     # -------------------------------------------------------------------------
 
-    async def listar_todas(self):
+    async def listar_todas(self) -> list[Meta]:
         """Lista todas as metas cadastradas (uso administrativo)."""
-        return await self.repo.list_all()
+        metas_orm = await self.repo.list_all()
+        return [orm_to_model(meta) for meta in metas_orm]
 
-    async def listar_por_pessoa(self, id_pessoa: int):
+    async def listar_por_pessoa(self, id_pessoa: int) -> list[Meta]:
         """Lista todas as metas vinculadas a uma pessoa."""
-        metas = await self.repo.list_by_pessoa(id_pessoa)
-        return metas or []
+        metas_orm = await self.repo.list_by_pessoa(id_pessoa)
+        return [orm_to_model(meta) for meta in metas_orm] if metas_orm else []
 
-    async def buscar_por_id(self, id_meta: int):
+    async def buscar_por_id(self, id_meta: int) -> Meta:
         """Busca uma meta específica pelo ID."""
-        meta = await self.repo.get_by_id(id_meta)
-        if not meta:
+        meta_orm = await self.repo.get_by_id(id_meta)
+        if not meta_orm:
             raise ValueError("Meta não encontrada.")
-        return meta
+        return orm_to_model(meta_orm)
 
-    async def criar(self, dados: dict):
+    async def criar(self, dados: dict[str, Any]) -> Meta:
         """
         Cria uma nova meta financeira.
 
@@ -44,8 +47,11 @@ class MetaService:
         - 'status' padrão: 'em andamento'
         """
         obrigatorios = [
-            "fk_pessoa_id_pessoa", "titulo", "descricao",
-            "valor_alvo", "termina_em"
+            "fk_pessoa_id_pessoa",
+            "titulo",
+            "descricao",
+            "valor_alvo",
+            "termina_em",
         ]
         for campo in obrigatorios:
             if not dados.get(campo):
@@ -65,42 +71,50 @@ class MetaService:
 
         # Preenche campos padrão se não vierem do payload
         dados.setdefault("criada_em", date.today())
-        dados.setdefault("status", "em andamento")
+        dados.setdefault("status", "em_andamento")
+        dados.setdefault("id_meta", None)  # Necessário para o modelo de domínio
 
-        nova_meta = MetaORM(**dados)
+        # Cria primeiro o modelo de domínio para validações
+        meta = Meta(**dados)
+        # Converte para ORM
+        nova_meta = model_to_orm_new(meta)
 
         try:
-            return await self.repo.add(nova_meta)
+            meta_criada = await self.repo.add(nova_meta)
+            return orm_to_model(meta_criada)
         except IntegrityError as e:
-            raise ValueError(f"Erro ao salvar meta: {e}")
+            raise ValueError(f"Erro de integridade ao salvar meta: {e}")
+        except Exception as e:
+            raise ValueError(f"Erro inesperado ao criar meta: {e}")
 
-    async def atualizar(self, id_meta: int, dados: dict):
+    async def atualizar(self, id_meta: int, dados: dict[str, Any]) -> Meta:
         """
         Atualiza os campos de uma meta existente.
         Permite mudar título, descrição, valores, data de término e status.
         """
-        meta = await self.repo.get_by_id(id_meta)
-        if not meta:
+        meta_orm = await self.repo.get_by_id(id_meta)
+        if not meta_orm:
             raise ValueError("Meta não encontrada.")
 
+        # Convertemos para modelo de domínio para atualizações
+        meta = orm_to_model(meta_orm)
+
+        # Atualiza apenas os campos fornecidos
         for campo, valor in dados.items():
             if hasattr(meta, campo):
                 setattr(meta, campo, valor)
 
-        # Validações rápidas pós-update
-        if meta.valor_alvo <= 0:
-            raise ValueError("O valor-alvo deve ser maior que zero.")
-        if meta.valor_atual < 0:
-            raise ValueError("O valor atual não pode ser negativo.")
-        if meta.termina_em < meta.criada_em:
-            raise ValueError("A data de término não pode ser anterior à data de criação.")
+        # As validações são feitas automaticamente pelo modelo de domínio
+        # devido ao __post_init__
 
         try:
-            return await self.repo.update(meta)
+            # Converte de volta para ORM e atualiza
+            meta_atualizada = await self.repo.update(model_to_orm_new(meta))
+            return orm_to_model(meta_atualizada)
         except IntegrityError as e:
             raise ValueError(f"Erro ao atualizar meta: {e}")
 
-    async def remover(self, id_meta: int):
+    async def remover(self, id_meta: int) -> None:
         """Remove uma meta existente."""
         meta = await self.repo.get_by_id(id_meta)
         if not meta:
@@ -111,22 +125,27 @@ class MetaService:
     # Regras de negócio adicionais
     # -------------------------------------------------------------------------
 
-    async def atualizar_progresso(self, id_meta: int, novo_valor: float):
+    async def atualizar_progresso(self, id_meta: int, novo_valor: Decimal) -> Meta:
         """
         Incrementa ou redefine o progresso de uma meta.
         - Não permite reduzir valor_atual para negativo.
         - Se atingir ou ultrapassar valor_alvo, muda status para 'concluída'.
         """
-        meta = await self.repo.get_by_id(id_meta)
-        if not meta:
+        meta_orm = await self.repo.get_by_id(id_meta)
+        if not meta_orm:
             raise ValueError("Meta não encontrada.")
+
+        # Convertemos para modelo de domínio
+        meta = orm_to_model(meta_orm)
 
         if novo_valor < 0:
             raise ValueError("O valor informado deve ser positivo.")
 
-        meta.valor_atual += float(novo_valor)
+        meta.valor_atual += Decimal(str(novo_valor))
 
         if meta.valor_atual >= meta.valor_alvo:
-            meta.status = "concluída"
+            meta.status = "concluida"
 
-        return await self.repo.update(meta)
+        # Atualiza no banco e retorna modelo atualizado
+        meta_atualizada = await self.repo.update(model_to_orm_new(meta))
+        return orm_to_model(meta_atualizada)

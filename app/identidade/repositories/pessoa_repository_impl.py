@@ -13,27 +13,41 @@ class PessoaRepositoryImpl(PessoaRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, id_pessoa: int) -> PessoaORM | None:
-        """Busca uma pessoa pelo ID."""
-        return await self.session.get(PessoaORM, id_pessoa)
-
-    async def get_by_email(self, email: str) -> PessoaORM | None:
-        """Busca uma pessoa pelo email."""
-        result = await self.session.execute(select(PessoaORM).where(PessoaORM.email == email))
-        return result.scalar_one_or_none()
+    async def create(self, pessoa: PessoaORM) -> PessoaORM:
+        try:
+            self.session.add(pessoa)
+            await self.session.flush()  # Flush to get the ID
+            await self.session.commit()  # Commit the transaction
+            await self.session.refresh(pessoa)  # Refresh to get all fields
+            return pessoa
+        except Exception as e:
+            await self.session.rollback()
+            raise ValueError(f"Erro ao criar pessoa: {str(e)}")
 
     async def list_all(self) -> list[PessoaORM]:
-        """Lista todas as pessoas cadastradas."""
-        result = await self.session.execute(select(PessoaORM))
-        return list(result.scalars())  # <- lista real
+        stmt = select(PessoaORM)
+        result = await self.session.execute(stmt)
+        await self.session.commit()  # Add commit here
+        return list(result.scalars().all())
 
-    async def add(self, pessoa: PessoaORM) -> PessoaORM:
-        """Adiciona uma nova pessoa no banco."""
-        self.session.add(pessoa)
-        await self.session.flush()
+    async def get_by_id(self, id_pessoa: int) -> PessoaORM | None:
+        stmt = select(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa)
+        result = await self.session.execute(stmt)
+        pessoa = result.scalar_one_or_none()
+        return pessoa
+
+    async def get_by_email(self, email: str) -> PessoaORM | None:
+        stmt = select(PessoaORM).where(PessoaORM.email == email)
+        result = await self.session.execute(stmt)
+        pessoa = result.scalar_one_or_none()
+        return pessoa
+
+    async def update(self, pessoa: PessoaORM) -> PessoaORM:
+        await self.session.merge(pessoa)
+        await self.session.commit()  # Add commit here
         return pessoa
 
     async def delete(self, id_pessoa: int) -> None:
-        """Remove uma pessoa pelo ID."""
-        await self.session.execute(delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa))
-        await self.session.flush()
+        stmt = delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa)
+        await self.session.execute(stmt)
+        await self.session.commit()  # Add commit here

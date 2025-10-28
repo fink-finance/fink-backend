@@ -11,6 +11,10 @@ from app.api.v1.routes import api_router
 from app.core.settings import settings
 from app.shared.database import init_db
 
+from app.alertas.api.routes import router as alertas_router
+from app.identidade.api.pessoa_routes import router as pessoas_router
+from app.metas.api.routes import router as metas_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -39,6 +43,9 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(pessoas_router, prefix="/api/v1/pessoas")
+app.include_router(alertas_router, prefix="/api/v1/alertas")
+app.include_router(metas_router, prefix="/api/v1/metas")
 
 
 @app.get("/")

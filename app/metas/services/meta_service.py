@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from typing import Any, List
+from typing import Any
 from sqlalchemy.exc import IntegrityError
 
 from app.metas.domain.meta import Meta

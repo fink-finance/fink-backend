@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal
 
 
 @dataclass
@@ -10,22 +11,26 @@ class Meta:
     fk_pessoa_id_pessoa: int
     titulo: str
     descricao: str
-    valor_alvo: float
-    valor_atual: float
+    valor_alvo: Decimal
+    valor_atual: Decimal
     criada_em: date
     termina_em: date
     status: str
 
     def __post_init__(self) -> None:
-        if not self.titulo.strip():
+        if not self.titulo or not self.titulo.strip():
             raise ValueError("Título é obrigatório")
-        if not self.descricao.strip():
+        if not self.descricao or not self.descricao.strip():
             raise ValueError("Descrição é obrigatória")
-        if self.valor_alvo < 0:
-            raise ValueError("valor_alvo deve ser >= 0")
+        if not self.fk_pessoa_id_pessoa or self.fk_pessoa_id_pessoa <= 0:
+            raise ValueError("ID da pessoa é obrigatório e deve ser maior que zero")
+        if self.valor_alvo <= 0:
+            raise ValueError("Valor alvo deve ser maior que zero")
         if self.valor_atual < 0:
-            raise ValueError("valor_atual deve ser >= 0")
+            raise ValueError("Valor atual não pode ser negativo")
         if self.termina_em < self.criada_em:
-            raise ValueError("termina_em deve ser >= criada_em")
-        if not self.status.strip():
-            raise ValueError("Status é obrigatório")
+            raise ValueError("Data de término não pode ser anterior à data de criação")
+
+        status_permitidos = {"em_andamento", "concluida", "cancelada", "atrasada"}
+        if not self.status or self.status.strip() not in status_permitidos:
+            raise ValueError(f"Status deve ser um dos seguintes: {', '.join(status_permitidos)}")

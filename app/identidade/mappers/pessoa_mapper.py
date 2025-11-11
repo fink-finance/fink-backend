@@ -27,9 +27,8 @@ def orm_to_model(orm: PessoaORM) -> Pessoa:
 
 
 def model_to_orm_new(model: Pessoa) -> PessoaORM:
-    """Cria nova instância de PessoaORM a partir de Pessoa (domain)."""
+    """Converte Pessoa (domain) para novo PessoaORM (persistence)."""
     return PessoaORM(
-        id_pessoa=model.id_pessoa,
         email=model.email,
         senha=model.senha,
         nome=model.nome,
@@ -41,23 +40,5 @@ def model_to_orm_new(model: Pessoa) -> PessoaORM:
         rua=model.rua,
         numero=model.numero,
         cep=model.cep,
-        data_criacao=model.data_criacao,
         admin=model.admin,
     )
-
-
-def update_orm_from_model(orm: PessoaORM, model: Pessoa) -> PessoaORM:
-    """Atualiza instância de PessoaORM existente com dados de Pessoa (domain)."""
-    orm.email = model.email
-    orm.senha = model.senha
-    orm.nome = model.nome
-    orm.data_nascimento = model.data_nascimento
-    orm.telefone = model.telefone
-    orm.genero = model.genero
-    orm.estado = model.estado
-    orm.cidade = model.cidade
-    orm.rua = model.rua
-    orm.numero = model.numero
-    orm.cep = model.cep
-    orm.admin = model.admin
-    return orm

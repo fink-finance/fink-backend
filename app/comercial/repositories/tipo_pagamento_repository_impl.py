@@ -24,18 +24,32 @@ class TipoPagamentoRepositoryImpl(TipoPagamentoRepository):
 
     async def list_all(self) -> list[TipoPagamentoORM]:
         result = await self.session.execute(select(TipoPagamentoORM))
-        return list(result.scalars())  # <- muda para list(...)
+        return list(result.scalars().all())
 
     async def add(self, tipo_pagamento: TipoPagamentoORM) -> TipoPagamentoORM:
-        self.session.add(tipo_pagamento)
-        await self.session.flush()
-        return tipo_pagamento
+        try:
+            self.session.add(tipo_pagamento)
+            await self.session.flush()
+            await self.session.commit()
+            await self.session.refresh(tipo_pagamento)
+            return tipo_pagamento
+        except Exception as e:
+            await self.session.rollback()
+            raise ValueError(f"Erro ao criar tipo_pagamento: {str(e)}")
 
     async def delete(self, id_pagamento: int) -> None:
-        await self.session.execute(delete(TipoPagamentoORM).where(TipoPagamentoORM.id_pagamento == id_pagamento))
-        await self.session.flush()
+        try:
+            await self.session.execute(delete(TipoPagamentoORM).where(TipoPagamentoORM.id_pagamento == id_pagamento))
+            await self.session.commit()
+        except Exception as e:
+            await self.session.rollback()
+            raise ValueError(f"Erro ao deletar tipo_pagamento: {str(e)}")
 
     async def update(self, tipo_pagamento: TipoPagamentoORM) -> TipoPagamentoORM:
-        merged = await self.session.merge(tipo_pagamento)
-        await self.session.flush()
-        return merged
+        try:
+            merged = await self.session.merge(tipo_pagamento)
+            await self.session.commit()
+            return merged
+        except Exception as e:
+            await self.session.rollback()
+            raise ValueError(f"Erro ao atualizar tipo_pagamento: {str(e)}")

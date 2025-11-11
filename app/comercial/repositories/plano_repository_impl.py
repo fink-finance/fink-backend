@@ -23,25 +23,25 @@ class PlanoRepositoryImpl(PlanoRepository):
         return result.scalar_one_or_none()
 
     async def list_all(self) -> list[PlanoORM]:
-        """Lista todos os planos disponíveis."""
+        """Lista todos os planos cadastrados."""
         result = await self.session.execute(select(PlanoORM))
-        return list(result.scalars())  # <- lista real (evita Sequence)
+        return list(result.scalars())
 
     async def add(self, plano: PlanoORM) -> PlanoORM:
-        """Adiciona um novo plano ao banco."""
+        """Adiciona um novo plano."""
         self.session.add(plano)
         await self.session.flush()
-        # opcional: materializar id/defaults
-        # await self.session.refresh(plano)
+        await self.session.commit()
+        await self.session.refresh(plano)
         return plano
 
     async def update(self, plano: PlanoORM) -> PlanoORM:
         """Atualiza um plano existente."""
         merged = await self.session.merge(plano)
-        await self.session.flush()
+        await self.session.commit()
         return merged
 
     async def delete(self, id_plano: int) -> None:
         """Remove um plano pelo ID."""
         await self.session.execute(delete(PlanoORM).where(PlanoORM.id_plano == id_plano))
-        await self.session.flush()
+        await self.session.commit()

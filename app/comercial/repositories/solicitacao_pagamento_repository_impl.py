@@ -34,14 +34,15 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
     async def add(self, solicitacao: SolicitacaoPagamentoORM) -> SolicitacaoPagamentoORM:
         """Adiciona uma nova solicitação."""
         self.session.add(solicitacao)
-        await self.session.flush()
-        # opcional: await self.session.refresh(solicitacao)
+        await self.session.commit()  # grava no banco
+        await self.session.refresh(solicitacao)  # garante id/data_hora atualizados
         return solicitacao
 
     async def update(self, solicitacao: SolicitacaoPagamentoORM) -> SolicitacaoPagamentoORM:
         """Atualiza uma solicitação existente."""
         merged = await self.session.merge(solicitacao)
-        await self.session.flush()
+        await self.session.commit()
+        await self.session.refresh(merged)
         return merged
 
     async def delete(self, id_solicitacao: int) -> None:
@@ -49,4 +50,4 @@ class SolicitacaoPagamentoRepositoryImpl(SolicitacaoPagamentoRepository):
         await self.session.execute(
             delete(SolicitacaoPagamentoORM).where(SolicitacaoPagamentoORM.id_solicitacao == id_solicitacao)
         )
-        await self.session.flush()
+        await self.session.commit()

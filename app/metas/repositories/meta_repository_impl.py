@@ -31,15 +31,18 @@ class MetaRepositoryImpl(MetaRepository):
         """Adiciona uma nova meta."""
         self.session.add(meta)
         await self.session.flush()
+        await self.session.commit()
         return meta
 
     async def update(self, meta: MetaORM) -> MetaORM:
         """Atualiza uma meta existente."""
         merged = await self.session.merge(meta)
         await self.session.flush()
+        await self.session.commit()
         return merged
 
     async def delete(self, id_meta: int) -> None:
         """Remove uma meta pelo ID."""
         await self.session.execute(delete(MetaORM).where(MetaORM.id_meta == id_meta))
         await self.session.flush()
+        await self.session.commit()

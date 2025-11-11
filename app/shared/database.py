@@ -63,3 +63,6 @@ async def init_db(create_all: bool = True) -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)

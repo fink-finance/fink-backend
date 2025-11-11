@@ -1,3 +1,4 @@
+from typing import Any, List
 from sqlalchemy.exc import IntegrityError
 from app.comercial.persistence.plano_orm import PlanoORM
 from app.comercial.repositories.plano_repository import PlanoRepository
@@ -13,25 +14,25 @@ class PlanoService:
     # CRUD principal
     # -------------------------------------------------------------------------
 
-    async def listar_todos(self):
+    async def listar_todos(self) -> List[PlanoORM]:
         """Lista todos os planos cadastrados."""
         return await self.repo.list_all()
 
-    async def buscar_por_id(self, id_plano: int):
+    async def buscar_por_id(self, id_plano: int) -> PlanoORM:
         """Busca um plano específico pelo ID."""
         plano = await self.repo.get_by_id(id_plano)
         if not plano:
             raise ValueError("Plano não encontrado.")
         return plano
 
-    async def buscar_por_titulo(self, titulo: str):
+    async def buscar_por_titulo(self, titulo: str) -> PlanoORM:
         """Busca um plano específico pelo título."""
         plano = await self.repo.get_by_titulo(titulo)
         if not plano:
             raise ValueError("Nenhum plano encontrado com esse título.")
         return plano
 
-    async def criar(self, dados: dict):
+    async def criar(self, dados: dict[str, Any]) -> PlanoORM:
         """
         Cria um novo plano de assinatura.
 
@@ -65,7 +66,7 @@ class PlanoService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao salvar plano: {e}")
 
-    async def atualizar(self, id_plano: int, dados: dict):
+    async def atualizar(self, id_plano: int, dados: dict[str, Any]) -> PlanoORM:
         """Atualiza os dados de um plano existente."""
         plano = await self.repo.get_by_id(id_plano)
         if not plano:
@@ -85,7 +86,7 @@ class PlanoService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao atualizar plano: {e}")
 
-    async def remover(self, id_plano: int):
+    async def remover(self, id_plano: int) -> None:
         """Remove um plano existente."""
         plano = await self.repo.get_by_id(id_plano)
         if not plano:
@@ -96,7 +97,7 @@ class PlanoService:
     # Regras adicionais (opcionais)
     # -------------------------------------------------------------------------
 
-    async def ativar(self, id_plano: int):
+    async def ativar(self, id_plano: int) -> PlanoORM:
         """Ativa um plano (define status='ativo')."""
         plano = await self.repo.get_by_id(id_plano)
         if not plano:
@@ -104,7 +105,7 @@ class PlanoService:
         plano.status = "ativo"
         return await self.repo.update(plano)
 
-    async def desativar(self, id_plano: int):
+    async def desativar(self, id_plano: int) -> PlanoORM:
         """Desativa um plano (define status='inativo')."""
         plano = await self.repo.get_by_id(id_plano)
         if not plano:

@@ -1,7 +1,9 @@
-from typing import Sequence
-from sqlalchemy.exc import IntegrityError
+from datetime import date
+from typing import Sequence, Any
+from app.identidade.domain.pessoa import Pessoa
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.repositories.pessoa_repository import PessoaRepository
+from app.identidade.mappers.pessoa_mapper import orm_to_model, model_to_orm_new
 
 
 class PessoaService:
@@ -10,73 +12,90 @@ class PessoaService:
     def __init__(self, repo: PessoaRepository):
         self.repo = repo
 
-    # -------------------------------------------------------------------------
-    # CRUD principal
-    # -------------------------------------------------------------------------
-
-    async def listar(self) -> Sequence[PessoaORM]:
-        """Lista todas as pessoas cadastradas."""
-        return await self.repo.list_all()
-
-    async def buscar_por_id(self, id_pessoa: int) -> PessoaORM:
-        pessoa = await self.repo.get_by_id(id_pessoa)
-        if not pessoa:
-            raise ValueError("Pessoa não encontrada.")
-        return pessoa
-
-    async def buscar_por_email(self, email: str) -> PessoaORM:
-        pessoa = await self.repo.get_by_email(email)
-        if not pessoa:
-            raise ValueError("Nenhum cadastro encontrado para esse e-mail.")
-        return pessoa
-
-    async def criar(self, dados: dict) -> PessoaORM:
-        """
-        Cria uma nova pessoa no sistema.
-        Regras:
-        - Campos obrigatórios devem estar preenchidos.
-        - E-mail deve ser único.
-        """
-        obrigatorios = [
-            "email",
-            "senha",
-            "nome",
-            "data_nascimento",
-            "telefone",
-            "genero",
-            "estado",
-            "cidade",
-            "rua",
-            "numero",
-            "cep",
-        ]
-        for campo in obrigatorios:
-            if not dados.get(campo):
-                raise ValueError(f"O campo '{campo}' é obrigatório.")
-
-        existente = await self.repo.get_by_email(dados["email"])
-        if existente:
-            raise ValueError("Já existe uma pessoa cadastrada com esse e-mail.")
-
-        pessoa = PessoaORM(**dados)
-
+    async def criar(self, pessoa_data: dict[str, Any]) -> Pessoa:
+        """Cria uma nova pessoa."""
         try:
-            return await self.repo.add(pessoa)
-        except IntegrityError as e:
-            raise ValueError(f"Erro ao salvar pessoa: {e}")
+            # Remove campos que não devem ser fornecidos no create
+            pessoa_data.pop("id_pessoa", None)
+            pessoa_data.pop("data_criacao", None)
+
+            # Create domain model with defaults
+            pessoa = Pessoa(id_pessoa=None, data_criacao=date.today(), admin=False, **pessoa_data)
+
+            # Verificar se já existe pessoa com este email
+            existing = await self.repo.get_by_email(pessoa.email)
+            if existing:
+                raise ValueError("Email já cadastrado")
+
+            # Convert to ORM and save
+            pessoa_orm = model_to_orm_new(pessoa)
+            created_orm = await self.repo.create(pessoa_orm)
+
+            # Convert back to domain model
+            return orm_to_model(created_orm)
+        except Exception as e:
+            raise ValueError(f"Erro ao criar pessoa: {str(e)}")
+
+    async def listar(self) -> list[Pessoa]:
+        """Lista todas as pessoas cadastradas."""
+        pessoas_orm = await self.repo.list_all()
+        return [orm_to_model(p) for p in pessoas_orm] if pessoas_orm else []
+
+    async def buscar_por_id(self, id_pessoa: int) -> Pessoa:
+        """Busca uma pessoa por ID."""
+        pessoa_orm = await self.repo.get_by_id(id_pessoa)
+        if not pessoa_orm:
+            raise ValueError("Pessoa não encontrada.")
+        return orm_to_model(pessoa_orm)
+
+    async def buscar_por_email(self, email: str) -> Pessoa:
+        """Busca uma pessoa por email."""
+        pessoa_orm = await self.repo.get_by_email(email)
+        if not pessoa_orm:
+            raise ValueError("Nenhum cadastro encontrado para esse e-mail.")
+        return orm_to_model(pessoa_orm)
+
+    async def atualizar(self, id_pessoa: int, pessoa_data: dict[str, Any]) -> Pessoa:
+        """Atualiza uma pessoa existente."""
+        try:
+            # Verifica se a pessoa existe
+            pessoa_atual = await self.repo.get_by_id(id_pessoa)
+            if not pessoa_atual:
+                raise ValueError("Pessoa não encontrada")
+
+            # Campos que não podem ser modificados
+            campos_protegidos = {
+                "id_pessoa",
+                "data_criacao",
+                "nome",
+                "data_nascimento",
+                "genero",
+            }
+            campos_invalidos = campos_protegidos.intersection(pessoa_data.keys())
+            if campos_invalidos:
+                raise ValueError(f"Não é permitido modificar os seguintes campos: {', '.join(campos_invalidos)}")
+
+            # Atualiza apenas os campos fornecidos
+            for key, value in pessoa_data.items():
+                if value is not None:
+                    setattr(pessoa_atual, key, value)
+
+            # Atualiza no banco
+            updated_orm = await self.repo.update(pessoa_atual)
+            return orm_to_model(updated_orm)
+        except Exception as e:
+            raise ValueError(f"Erro ao atualizar pessoa: {str(e)}")
 
     async def remover(self, id_pessoa: int) -> None:
+        """Remove uma pessoa existente."""
         pessoa = await self.repo.get_by_id(id_pessoa)
         if not pessoa:
-            raise ValueError("Pessoa não encontrada.")
+            raise ValueError("Pessoa não encontrada")
         await self.repo.delete(id_pessoa)
 
-    # -------------------------------------------------------------------------
-    # Conversões auxiliares (ORM -> dict)
-    # -------------------------------------------------------------------------
-
     @staticmethod
-    def to_dict(p: PessoaORM) -> dict:
+    def to_dict(p: PessoaORM) -> dict[str, Any]:
+        """Converte PessoaORM para dicionário."""
         return {
             "id_pessoa": p.id_pessoa,
             "email": p.email,
@@ -94,5 +113,6 @@ class PessoaService:
         }
 
     @classmethod
-    def list_to_dict(cls, pessoas: Sequence[PessoaORM]) -> list[dict]:
+    def list_to_dict(cls, pessoas: Sequence[PessoaORM]) -> list[dict[str, Any]]:
+        """Converte uma lista de PessoaORM para lista de dicionários."""
         return [cls.to_dict(p) for p in pessoas]

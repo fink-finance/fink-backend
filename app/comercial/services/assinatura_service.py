@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from typing import Any, List
 from sqlalchemy.exc import IntegrityError
 
 from app.comercial.persistence.assinatura_orm import AssinaturaORM
@@ -15,26 +16,26 @@ class AssinaturaService:
     # CRUD principal
     # -------------------------------------------------------------------------
 
-    async def listar_todas(self):
+    async def listar_todas(self) -> List[AssinaturaORM]:
         """Lista todas as assinaturas (uso administrativo)."""
         return await self.repo.list_all()
 
-    async def listar_por_pessoa(self, id_pessoa: int):
+    async def listar_por_pessoa(self, id_pessoa: int) -> List[AssinaturaORM]:
         """Lista todas as assinaturas vinculadas a uma pessoa."""
         return await self.repo.list_by_pessoa(id_pessoa)
 
-    async def listar_por_plano(self, id_plano: int):
+    async def listar_por_plano(self, id_plano: int) -> List[AssinaturaORM]:
         """Lista todas as assinaturas vinculadas a um plano."""
         return await self.repo.list_by_plano(id_plano)
 
-    async def buscar_por_id(self, id_assinatura: int):
+    async def buscar_por_id(self, id_assinatura: int) -> AssinaturaORM:
         """Busca uma assinatura pelo ID."""
         assinatura = await self.repo.get_by_id(id_assinatura)
         if not assinatura:
             raise ValueError("Assinatura não encontrada.")
         return assinatura
 
-    async def criar(self, dados: dict):
+    async def criar(self, dados: dict[str, Any]) -> AssinaturaORM:
         """
         Cria uma nova assinatura.
 
@@ -45,7 +46,12 @@ class AssinaturaService:
         - A pessoa não pode ter outra assinatura ativa para o mesmo plano.
         - `status` padrão: 'ativa'.
         """
-        obrigatorios = ["fk_pessoa_id_pessoa", "fk_plano_id_plano", "comeca_em", "termina_em"]
+        obrigatorios = [
+            "fk_pessoa_id_pessoa",
+            "fk_plano_id_plano",
+            "comeca_em",
+            "termina_em",
+        ]
         for campo in obrigatorios:
             if not dados.get(campo):
                 raise ValueError(f"O campo '{campo}' é obrigatório.")
@@ -77,7 +83,7 @@ class AssinaturaService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao criar assinatura: {e}")
 
-    async def atualizar(self, id_assinatura: int, dados: dict):
+    async def atualizar(self, id_assinatura: int, dados: dict[str, Any]) -> AssinaturaORM:
         """Atualiza uma assinatura existente."""
         assinatura = await self.repo.get_by_id(id_assinatura)
         if not assinatura:
@@ -95,7 +101,7 @@ class AssinaturaService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao atualizar assinatura: {e}")
 
-    async def remover(self, id_assinatura: int):
+    async def remover(self, id_assinatura: int) -> None:
         """Remove uma assinatura existente."""
         assinatura = await self.repo.get_by_id(id_assinatura)
         if not assinatura:
@@ -106,7 +112,7 @@ class AssinaturaService:
     # Regras de negócio adicionais
     # -------------------------------------------------------------------------
 
-    async def renovar(self, id_assinatura: int, meses: int = 1):
+    async def renovar(self, id_assinatura: int, meses: int = 1) -> AssinaturaORM:
         """
         Renova uma assinatura existente, estendendo o período.
         - Se a assinatura estiver ativa, adiciona meses ao término.
@@ -129,7 +135,7 @@ class AssinaturaService:
 
         return await self.repo.update(assinatura)
 
-    async def cancelar(self, id_assinatura: int):
+    async def cancelar(self, id_assinatura: int) -> AssinaturaORM:
         """Cancela uma assinatura (define status='cancelada')."""
         assinatura = await self.repo.get_by_id(id_assinatura)
         if not assinatura:

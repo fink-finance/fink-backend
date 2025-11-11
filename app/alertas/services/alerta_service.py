@@ -1,3 +1,4 @@
+from typing import Any, List
 from sqlalchemy.exc import IntegrityError
 from app.alertas.persistence.alerta_orm import AlertaORM
 from app.alertas.repositories.alerta_repository import AlertaRepository
@@ -13,26 +14,26 @@ class AlertaService:
     # CRUD principal
     # -------------------------------------------------------------------------
 
-    async def listar_todos(self):
+    async def listar_todos(self) -> List[AlertaORM]:
         """Lista todos os alertas cadastrados (uso administrativo)."""
         return await self.repo.list_all()
 
-    async def listar_por_pessoa(self, id_pessoa: int):
+    async def listar_por_pessoa(self, id_pessoa: int) -> List[AlertaORM]:
         """Lista todos os alertas vinculados a uma pessoa."""
         return await self.repo.list_by_pessoa(id_pessoa)
 
-    async def listar_por_meta(self, id_meta: int):
+    async def listar_por_meta(self, id_meta: int) -> List[AlertaORM]:
         """Lista todos os alertas vinculados a uma meta."""
         return await self.repo.list_by_meta(id_meta)
 
-    async def buscar_por_id(self, id_alerta: int):
+    async def buscar_por_id(self, id_alerta: int) -> AlertaORM:
         """Busca um alerta pelo ID."""
         alerta = await self.repo.get_by_id(id_alerta)
         if not alerta:
             raise ValueError("Alerta não encontrado.")
         return alerta
 
-    async def criar(self, dados: dict):
+    async def criar(self, dados: dict[str, Any]) -> AlertaORM:
         """
         Cria um novo alerta.
 
@@ -69,7 +70,7 @@ class AlertaService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao salvar alerta: {e}")
 
-    async def atualizar(self, id_alerta: int, dados: dict):
+    async def atualizar(self, id_alerta: int, dados: dict[str, Any]) -> AlertaORM:
         """Atualiza um alerta existente."""
         alerta = await self.repo.get_by_id(id_alerta)
         if not alerta:
@@ -87,7 +88,7 @@ class AlertaService:
         except IntegrityError as e:
             raise ValueError(f"Erro ao atualizar alerta: {e}")
 
-    async def remover(self, id_alerta: int):
+    async def remover(self, id_alerta: int) -> None:
         """Remove um alerta existente."""
         alerta = await self.repo.get_by_id(id_alerta)
         if not alerta:
@@ -98,7 +99,7 @@ class AlertaService:
     # Regras de negócio adicionais (opcional)
     # -------------------------------------------------------------------------
 
-    async def avaliar_alerta(self, parametro: str, valor_referencia: float, id_pessoa: int):
+    async def avaliar_alerta(self, parametro: str, valor_referencia: float, id_pessoa: int) -> List[AlertaORM]:
         """
         Avalia todos os alertas de uma pessoa para um determinado parâmetro,
         retornando os que foram 'disparados' (condição verdadeira).

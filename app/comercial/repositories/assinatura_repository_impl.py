@@ -35,16 +35,18 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
     async def add(self, assinatura: AssinaturaORM) -> AssinaturaORM:
         """Cria uma nova assinatura."""
         self.session.add(assinatura)
-        await self.session.flush()
+        await self.session.commit()
+        await self.session.refresh(assinatura)
         return assinatura
 
     async def update(self, assinatura: AssinaturaORM) -> AssinaturaORM:
         """Atualiza uma assinatura existente."""
         merged = await self.session.merge(assinatura)
-        await self.session.flush()
+        await self.session.commit()
+        await self.session.refresh(merged)
         return merged
 
     async def delete(self, id_assinatura: int) -> None:
         """Remove uma assinatura pelo ID."""
         await self.session.execute(delete(AssinaturaORM).where(AssinaturaORM.id_assinatura == id_assinatura))
-        await self.session.flush()
+        await self.session.commit()

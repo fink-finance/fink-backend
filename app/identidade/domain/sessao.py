@@ -17,7 +17,6 @@ class Sessao:
     expira_em: date
 
     def __post_init__(self) -> None:
-        """Validação dos campos obrigatórios."""
         if not self.token_hash or not self.token_hash.strip():
             raise ValueError("token_hash é obrigatório")
         if not self.fk_pessoa_id_pessoa:

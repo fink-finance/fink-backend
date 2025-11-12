@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env.example",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -49,9 +49,15 @@ class Settings(BaseSettings):
 
     # CORS
     allowed_origins: list[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8080"],
+        default=["http://localhost:3000", "http://localhost:8080", "http://localhost:5173"],
         description="Allowed CORS origins",
     )
+
+    # Pluggy
+    pluggy_base_url: str = Field(default="https://api.pluggy.ai", description="Pluggy API base URL")
+    pluggy_client_id: str = Field(default="", description="Pluggy client id")
+    pluggy_client_secret: str = Field(default="", description="Pluggy client secret")
+
 
     # Logging
     log_level: str = Field(default="INFO", description="Logging level")

@@ -12,6 +12,9 @@ from app.api.v1.routes import api_router
 from app.core.settings import settings
 from app.shared.database import init_db
 
+from app.providers.pluggy_client import PluggyClient
+from app.api.pluggy_routes import router as pluggy_router
+
 from app.alertas.api.routes import router as alertas_router
 from app.identidade.api.pessoa_routes import router as pessoas_router
 from app.metas.api.routes import router as metas_router
@@ -26,13 +29,36 @@ from app.comercial.api.solicitacao_pagamento_routes import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Manage application startup and shutdown tasks.
-
-    Initializes database objects on startup (except in production)
-    and yields control back to FastAPI; no explicit shutdown logic yet.
-    """
+    # DB
     await init_db(create_all=(settings.environment != "production"))
-    yield
+
+    # Sanity check das variáveis de ambiente da Pluggy
+    print(f"[PLUGGY] base_url = {settings.pluggy_base_url}")
+    print(f"[PLUGGY] client_id set? {bool(settings.pluggy_client_id)}")
+    print(f"[PLUGGY] client_secret set? {bool(settings.pluggy_client_secret)}")
+
+    # Inicializa o client
+    app.state.pluggy_client = PluggyClient(
+        base_url=settings.pluggy_base_url,
+        client_id=settings.pluggy_client_id,
+        client_secret=settings.pluggy_client_secret,
+    )
+
+    # Validação rápida (opcional, mas ajuda a pegar erro cedo)
+    try:
+        _ = await app.state.pluggy_client.auth_token()
+        print("[PLUGGY] auth_token OK")
+    except Exception as e:
+        # Não derruba a app, mas deixa claro o motivo se /connect-token falhar depois
+        print(f"[PLUGGY] auth_token FAILED: {e}")
+
+    try:
+        yield
+    finally:
+        client = getattr(app.state, "pluggy_client", None)
+        if client:
+            await client.close()
+
 
 
 app = FastAPI(
@@ -61,6 +87,8 @@ app.include_router(sessoes_router, prefix="/api/v1/sessoes")
 app.include_router(assinaturas_router, prefix="/api/v1/assinaturas")
 app.include_router(tipos_pagamento_router, prefix="/api/v1/tipos-pagamento")
 app.include_router(solicitacoes_pagamento_router, prefix="/api/v1/solicitacoes-pagamento")
+app.include_router(pluggy_router)
+
 
 
 @app.get("/")

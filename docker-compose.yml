@@ -7,7 +7,7 @@ services:
             POSTGRES_PASSWORD: fink
             POSTGRES_DB: fink
         ports:
-            - "5432:5432"
+            - "5433:5432"
         volumes:
             - fink_pg:/var/lib/postgresql/data
         healthcheck:
@@ -53,6 +53,21 @@ services:
             ]
         volumes:
             - .:/app
+        restart: unless-stopped
+
+    pgweb:
+        image: sosedoff/pgweb:latest
+        container_name: fink_pgweb
+        # Perfil 'dev' para não subir em produção por acidente
+        profiles:
+            - dev
+        # Remover --bind pois o mapeamento de portas do Docker já faz o bind correto
+        command: ["--url", "postgres://fink:fink@postgres:5432/fink?sslmode=disable"]
+        ports:
+            - "8081:8081"
+        depends_on:
+            postgres:
+                condition: service_healthy
         restart: unless-stopped
 
 volumes:

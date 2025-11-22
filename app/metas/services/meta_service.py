@@ -42,9 +42,9 @@ class MetaService:
         Regras de negócio:
         - 'fk_pessoa_id_pessoa' é obrigatório (meta precisa pertencer a alguém)
         - 'valor_alvo' deve ser positivo (> 0)
-        - 'valor_atual' inicia em 0 ou valor informado >= 0
+        - 'valor_atual' inicia em 0 automaticamente
         - 'termina_em' deve ser uma data no futuro
-        - 'status' padrão: 'em andamento'
+        - 'status' padrão: 'em_andamento'
         """
         obrigatorios = [
             "fk_pessoa_id_pessoa",
@@ -61,17 +61,14 @@ class MetaService:
         if valor_alvo <= 0:
             raise ValueError("O valor-alvo deve ser maior que zero.")
 
-        valor_atual = Decimal(str(dados.get("valor_atual", "0")))
-        if valor_atual < 0:
-            raise ValueError("O valor atual não pode ser negativo.")
-
         data_termino = dados["termina_em"]
         if data_termino < date.today():
             raise ValueError("A data de término não pode ser anterior à data atual.")
 
-        # Preenche campos padrão se não vierem do payload
+        # Preenche campos padrão/automáticos
         dados.setdefault("criada_em", date.today())
         dados.setdefault("status", "em_andamento")
+        dados.setdefault("valor_atual", Decimal("0"))  # Sempre inicia em 0
         dados.setdefault("id_meta", None)  # Necessário para o modelo de domínio
 
         # Cria primeiro o modelo de domínio para validações

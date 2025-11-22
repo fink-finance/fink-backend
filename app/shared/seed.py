@@ -187,8 +187,9 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
                 descricao=cfg["descricao"],
                 valor_alvo=cfg["valor_alvo"],
                 valor_atual=cfg["valor_atual"],
+                criada_em=date.today(),  # ✅ Define a data atual
                 termina_em=cfg["termina_em"],
-                # status usa o default 'em_andamento'
+                status="em_andamento",  # ✅ Define o status inicial
             )
             session.add(meta)
             await session.commit()

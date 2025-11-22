@@ -26,14 +26,13 @@ class MetaORM(Base):
     titulo: Mapped[str] = mapped_column(String(100), nullable=False)
     descricao: Mapped[str] = mapped_column(String(500), nullable=False)
     valor_alvo: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
-    valor_atual: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, server_default="0")
-    criada_em: Mapped[date] = mapped_column(Date, nullable=False, server_default=func.current_date())
+    valor_atual: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    criada_em: Mapped[date] = mapped_column(Date, nullable=False)
     termina_em: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[str] = mapped_column(
         String(20),
         CheckConstraint("status IN ('em_andamento', 'concluida', 'cancelada', 'atrasada')"),
         nullable=False,
-        server_default="em_andamento",
     )
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="metas")

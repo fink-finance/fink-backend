@@ -11,6 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.routes import api_router
 from app.core.settings import settings
 from app.shared.database import init_db
+from app.shared.seed import seed_db
+
 
 from app.providers.pluggy_client import PluggyClient
 from app.api.pluggy_routes import router as pluggy_router
@@ -31,6 +33,9 @@ from app.comercial.api.solicitacao_pagamento_routes import (
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # DB
     await init_db(create_all=(settings.environment != "production"))
+    # Seed (sugiro rodar só fora de produção)
+    if settings.environment != "production":
+        await seed_db()
 
     # Sanity check das variáveis de ambiente da Pluggy
     print(f"[PLUGGY] base_url = {settings.pluggy_base_url}")

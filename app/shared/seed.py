@@ -25,6 +25,9 @@ DEMO_EMAIL = "demo@fink.dev"
 async def seed_db() -> None:
     print("[SEED] Iniciando seed do banco...")
     async with async_session_maker() as session:
+        # Limpa dados demo antes de popular
+        await clear_demo_data(session)
+        
         await seed_tipos_pagamento(session)
         await seed_planos(session)
         pessoa_demo = await seed_pessoa_demo(session)
@@ -33,6 +36,29 @@ async def seed_db() -> None:
         await seed_solicitacao_pagamento_demo(session, assinatura_demo)
         await seed_alertas_demo(session, pessoa_demo, meta_demos)
     print("[SEED] Seed finalizado com sucesso!")
+
+
+async def clear_demo_data(session: AsyncSession) -> None:
+    """
+    Remove dados demo existentes antes de popular novamente.
+    Isso permite que o seed seja idempotente e sempre crie dados frescos.
+    """
+    print("[SEED] Limpando dados demo existentes...")
+    
+    # Busca pessoa demo
+    result = await session.execute(
+        select(PessoaORM).where(PessoaORM.email == DEMO_EMAIL)
+    )
+    pessoa = result.scalar_one_or_none()
+    
+    if pessoa:
+        print(f"[SEED] Removendo pessoa demo (ID: {pessoa.id_pessoa}) e dados relacionados...")
+        # Delete em cascata remove: metas, alertas, sessões, assinaturas, etc.
+        await session.delete(pessoa)
+        await session.commit()
+        print("[SEED] Dados demo removidos com sucesso!")
+    else:
+        print("[SEED] Nenhum dado demo encontrado para remover.")
 
 
 
@@ -105,15 +131,8 @@ async def seed_planos(session: AsyncSession) -> None:
 
 async def seed_pessoa_demo(session: AsyncSession) -> PessoaORM:
     """
-    Cria uma pessoa demo para testes.
+    Cria uma pessoa demo para testes (dados já foram limpos anteriormente).
     """
-    result = await session.execute(
-        select(PessoaORM).where(PessoaORM.email == DEMO_EMAIL)
-    )
-    pessoa = result.scalar_one_or_none()
-    if pessoa:
-        return pessoa
-
     pessoa = PessoaORM(
         email=DEMO_EMAIL,
         senha="demo123",  # em produção deveria ser hash!
@@ -132,6 +151,7 @@ async def seed_pessoa_demo(session: AsyncSession) -> PessoaORM:
     session.add(pessoa)
     await session.commit()
     await session.refresh(pessoa)
+    print(f"[SEED] Pessoa demo criada (ID: {pessoa.id_pessoa})")
     return pessoa
 
 
@@ -167,35 +187,50 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
             "valor_atual": Decimal("2000.00"),
             "termina_em": date(date.today().year + 1, 1, 31),
         },
+        {
+            "titulo": "Intercâmbio no Canadá",
+            "categoria": "Intercâmbio",
+            "valor_alvo": Decimal("50000.00"),
+            "valor_atual": Decimal("5000.00"),
+            "termina_em": date(date.today().year + 2, 6, 30),
+        },
+        {
+            "titulo": "Plano de Saúde Premium",
+            "categoria": "Saúde",
+            "valor_alvo": Decimal("6000.00"),
+            "valor_atual": Decimal("1500.00"),
+            "termina_em": date(date.today().year + 1, 3, 31),
+        },
+        {
+            "titulo": "Sistema de Segurança Residencial",
+            "categoria": "Segurança",
+            "valor_alvo": Decimal("4000.00"),
+            "valor_atual": Decimal("800.00"),
+            "termina_em": date.fromordinal(date.today().toordinal() + 120),
+        },
     ]
 
     metas_criadas: list[MetaORM] = []
 
     for cfg in metas_config:
-        # Verifica se essa meta já existe para a pessoa
-        result = await session.execute(
-            select(MetaORM).where(
-                MetaORM.fk_pessoa_id_pessoa == pessoa.id_pessoa,
-                MetaORM.titulo == cfg["titulo"],
-            )
+        meta = MetaORM(
+            fk_pessoa_id_pessoa=pessoa.id_pessoa,
+            titulo=cfg["titulo"],
+            categoria=cfg["categoria"],
+            valor_alvo=cfg["valor_alvo"],
+            valor_atual=cfg["valor_atual"],
+            criada_em=date.today(),
+            termina_em=cfg["termina_em"],
+            status="em_andamento",
         )
-        meta = result.scalar_one_or_none()
-        if meta is None:
-            meta = MetaORM(
-                fk_pessoa_id_pessoa=pessoa.id_pessoa,
-                titulo=cfg["titulo"],
-                categoria=cfg["categoria"],
-                valor_alvo=cfg["valor_alvo"],
-                valor_atual=cfg["valor_atual"],
-                criada_em=date.today(),  # ✅ Define a data atual
-                termina_em=cfg["termina_em"],
-                status="em_andamento",  # ✅ Define o status inicial
-            )
-            session.add(meta)
-            await session.commit()
-            await session.refresh(meta)
+        session.add(meta)
         metas_criadas.append(meta)
 
+    await session.commit()
+    for meta in metas_criadas:
+        await session.refresh(meta)
+
+    print(f"[SEED] {len(metas_criadas)} metas demo criadas")
     return metas_criadas
 
 # ------------------------ ASSINATURA --------------------------
@@ -203,18 +238,9 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
 
 async def seed_assinatura_demo(session: AsyncSession, pessoa: PessoaORM) -> AssinaturaORM:
     """
-    Cria uma assinatura demo para a pessoa demo, usando o plano 'Essencial'
-    (ou o primeiro plano disponível).
+    Cria uma assinatura demo para a pessoa demo (dados já foram limpos anteriormente).
     """
-    # Verificar se a pessoa já tem alguma assinatura
-    result = await session.execute(
-        select(AssinaturaORM).where(AssinaturaORM.fk_pessoa_id_pessoa == pessoa.id_pessoa)
-    )
-    assinatura = result.scalar_one_or_none()
-    if assinatura:
-        return assinatura
-
-    # Buscar um plano para vincular
+    # Buscar plano 'Essencial' para vincular
     result_plano = await session.execute(
         select(PlanoORM).where(PlanoORM.titulo == "Essencial")
     )
@@ -225,10 +251,7 @@ async def seed_assinatura_demo(session: AsyncSession, pessoa: PessoaORM) -> Assi
         plano = result_plano.scalar_one()
 
     hoje = date.today()
-    termina = date(hoje.year, hoje.month, hoje.day)
-    # se duracao_meses > 0, você pode sofisticar isso depois
-    # por enquanto deixamos com termina_em = hoje + 30 dias:
-    termina = date.fromordinal(hoje.toordinal() + 30)
+    termina = date.fromordinal(hoje.toordinal() + 30)  # 30 dias
 
     assinatura = AssinaturaORM(
         fk_pessoa_id_pessoa=pessoa.id_pessoa,
@@ -241,6 +264,7 @@ async def seed_assinatura_demo(session: AsyncSession, pessoa: PessoaORM) -> Assi
     session.add(assinatura)
     await session.commit()
     await session.refresh(assinatura)
+    print(f"[SEED] Assinatura demo criada (Plano: {plano.titulo})")
     return assinatura
 
 
@@ -252,17 +276,8 @@ async def seed_solicitacao_pagamento_demo(
     assinatura: AssinaturaORM,
 ) -> None:
     """
-    Cria uma solicitação de pagamento demo para a assinatura demo.
+    Cria uma solicitação de pagamento demo (dados já foram limpos anteriormente).
     """
-    result = await session.execute(
-        select(SolicitacaoPagamentoORM).where(
-            SolicitacaoPagamentoORM.fk_assinatura_id_assinatura == assinatura.id_assinatura
-        )
-    )
-    existe = result.scalar_one_or_none()
-    if existe:
-        return
-
     # Escolher um tipo de pagamento (ex.: 'Pix')
     result_tipo = await session.execute(
         select(TipoPagamentoORM).where(TipoPagamentoORM.tipo_pagamento == "Pix")
@@ -281,6 +296,7 @@ async def seed_solicitacao_pagamento_demo(
 
     session.add(solicitacao)
     await session.commit()
+    print("[SEED] Solicitação de pagamento demo criada")
 
 
 # --------------------------- ALERTA ---------------------------
@@ -292,16 +308,18 @@ async def seed_alertas_demo(
     metas: list[MetaORM],
 ) -> None:
     """
-    Cria múltiplos alertas para a pessoa demo e suas metas.
+    Cria múltiplos alertas para a pessoa demo e suas metas (dados já foram limpos anteriormente).
 
     Exemplos de alertas:
     - progresso_meta >= 80% (para todas as metas)
     - progresso_meta >= 100% (meta concluída)
     - dias_para_termino <= 7 (alerta de prazo curto)
     """
+    alertas_count = 0
+    
     for meta in metas:
         # 1) Alerta de meta quase concluída (80%)
-        await _ensure_alert(
+        alertas_count += await _create_alert(
             session=session,
             pessoa_id=pessoa.id_pessoa,
             meta_id=meta.id_meta,
@@ -311,7 +329,7 @@ async def seed_alertas_demo(
         )
 
         # 2) Alerta de meta concluída (100%)
-        await _ensure_alert(
+        alertas_count += await _create_alert(
             session=session,
             pessoa_id=pessoa.id_pessoa,
             meta_id=meta.id_meta,
@@ -321,7 +339,7 @@ async def seed_alertas_demo(
         )
 
         # 3) Alerta de prazo curto (7 dias para terminar)
-        await _ensure_alert(
+        alertas_count += await _create_alert(
             session=session,
             pessoa_id=pessoa.id_pessoa,
             meta_id=meta.id_meta,
@@ -331,7 +349,7 @@ async def seed_alertas_demo(
         )
 
     # Exemplo de alerta global (sem meta específica): saldo geral muito baixo
-    await _ensure_alert(
+    alertas_count += await _create_alert(
         session=session,
         pessoa_id=pessoa.id_pessoa,
         meta_id=None,
@@ -339,36 +357,22 @@ async def seed_alertas_demo(
         acao="menor_ou_igual_que",
         valor=100.0,
     )
+    
+    print(f"[SEED] {alertas_count} alertas demo criados")
 
 
-async def _ensure_alert(
+async def _create_alert(
     session: AsyncSession,
     pessoa_id: int,
     meta_id: int | None,
     parametro: str,
     acao: str,
     valor: float,
-) -> None:
+) -> int:
     """
-    Garante que exista um alerta com os parâmetros dados.
-    Se já existir, não cria outro (idempotente).
+    Cria um alerta com os parâmetros dados.
+    Retorna 1 para contabilizar o alerta criado.
     """
-    query = select(AlertaORM).where(
-        AlertaORM.fk_pessoa_id_pessoa == pessoa_id,
-        AlertaORM.parametro == parametro,
-        AlertaORM.acao == acao,
-        AlertaORM.valor == valor,
-    )
-    if meta_id is not None:
-        query = query.where(AlertaORM.fk_meta_id_meta == meta_id)
-    else:
-        query = query.where(AlertaORM.fk_meta_id_meta.is_(None))  # type: ignore[arg-type]
-
-    result = await session.execute(query)
-    exists = result.scalar_one_or_none()
-    if exists:
-        return
-
     alerta = AlertaORM(
         fk_pessoa_id_pessoa=pessoa_id,
         fk_meta_id_meta=meta_id,
@@ -378,3 +382,4 @@ async def _ensure_alert(
     )
     session.add(alerta)
     await session.commit()
+    return 1

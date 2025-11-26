@@ -98,11 +98,22 @@ class MetaService:
     async def atualizar(self, id_meta: int, dados: dict[str, Any]) -> Meta:
         """
         Atualiza os campos de uma meta existente.
-        Permite mudar título, descrição, valores, data de término e status.
+        Permite mudar título, categoria, valores, data de término e status.
         """
         meta_orm = await self.repo.get_by_id(id_meta)
         if not meta_orm:
             raise ValueError("Meta não encontrada.")
+
+        # ⚠️ COMPATIBILIDADE TEMPORÁRIA: aceita "descricao" como alias de "categoria"
+        if "descricao" in dados and "categoria" not in dados:
+            dados["categoria"] = dados.pop("descricao")
+        
+        # Remove descricao se vier junto (prioriza categoria)
+        dados.pop("descricao", None)
+        
+        # Normaliza categoria se fornecida
+        if "categoria" in dados:
+            dados["categoria"] = CategoriaMetaEnum.normalize(dados["categoria"])
 
         # Convertemos para modelo de domínio para atualizações
         meta = orm_to_model(meta_orm)

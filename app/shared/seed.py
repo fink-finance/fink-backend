@@ -146,7 +146,7 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
     metas_config = [
         {
             "titulo": "Reserva de Emergência",
-            "descricao": "Construir uma reserva equivalente a 6 meses de despesas.",
+            "categoria": "Emergência",
             "valor_alvo": Decimal("5000.00"),
             "valor_atual": Decimal("500.00"),
             # termina no fim do próximo ano
@@ -154,7 +154,7 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
         },
         {
             "titulo": "Quitar Cartão de Crédito",
-            "descricao": "Zerar o saldo devedor do cartão de crédito principal.",
+            "categoria": "Dívidas",
             "valor_alvo": Decimal("3000.00"),
             "valor_atual": Decimal("1200.00"),
             # daqui a 6 meses (aproximado em dias)
@@ -162,7 +162,7 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
         },
         {
             "titulo": "Viagem de Férias",
-            "descricao": "Juntar dinheiro para uma viagem de férias no fim do ano.",
+            "categoria": "Viagem",
             "valor_alvo": Decimal("8000.00"),
             "valor_atual": Decimal("2000.00"),
             "termina_em": date(date.today().year + 1, 1, 31),
@@ -184,7 +184,7 @@ async def seed_metas_demo(session: AsyncSession, pessoa: PessoaORM) -> list[Meta
             meta = MetaORM(
                 fk_pessoa_id_pessoa=pessoa.id_pessoa,
                 titulo=cfg["titulo"],
-                descricao=cfg["descricao"],
+                categoria=cfg["categoria"],
                 valor_alvo=cfg["valor_alvo"],
                 valor_atual=cfg["valor_atual"],
                 criada_em=date.today(),  # ✅ Define a data atual

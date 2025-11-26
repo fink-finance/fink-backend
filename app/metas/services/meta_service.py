@@ -49,7 +49,7 @@ class MetaService:
         obrigatorios = [
             "fk_pessoa_id_pessoa",
             "titulo",
-            "descricao",
+            "categoria",
             "valor_alvo",
             "termina_em",
         ]
@@ -66,6 +66,7 @@ class MetaService:
             raise ValueError("A data de término não pode ser anterior à data atual.")
 
         # Preenche campos padrão/automáticos
+        dados.setdefault("descricao", "")
         dados.setdefault("criada_em", date.today())
         dados.setdefault("status", "em_andamento")
         dados.setdefault("valor_atual", Decimal("0"))  # Sempre inicia em 0

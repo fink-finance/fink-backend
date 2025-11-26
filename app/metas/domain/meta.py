@@ -10,7 +10,7 @@ class Meta:
     id_meta: int | None
     fk_pessoa_id_pessoa: int
     titulo: str
-    descricao: str
+    categoria: str
     valor_alvo: Decimal
     valor_atual: Decimal
     criada_em: date
@@ -20,8 +20,8 @@ class Meta:
     def __post_init__(self) -> None:
         if not self.titulo or not self.titulo.strip():
             raise ValueError("Título é obrigatório")
-        if not self.descricao or not self.descricao.strip():
-            raise ValueError("Descrição é obrigatória")
+        if not self.categoria or not self.categoria.strip():
+            raise ValueError("Categoria é obrigatória")
         if not self.fk_pessoa_id_pessoa or self.fk_pessoa_id_pessoa <= 0:
             raise ValueError("ID da pessoa é obrigatório e deve ser maior que zero")
         if self.valor_alvo <= 0:

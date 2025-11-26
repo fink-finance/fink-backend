@@ -24,7 +24,7 @@ class MetaORM(Base):
     )
 
     titulo: Mapped[str] = mapped_column(String(100), nullable=False)
-    descricao: Mapped[str] = mapped_column(String(500), nullable=False)
+    categoria: Mapped[str] = mapped_column(String(500), nullable=False)
     valor_alvo: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     valor_atual: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     criada_em: Mapped[date] = mapped_column(Date, nullable=False)

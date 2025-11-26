@@ -12,7 +12,7 @@ def orm_to_model(orm: MetaORM) -> Meta:
         id_meta=orm.id_meta,
         fk_pessoa_id_pessoa=orm.fk_pessoa_id_pessoa,
         titulo=orm.titulo,
-        descricao=orm.descricao,
+        categoria=orm.categoria,
         valor_alvo=orm.valor_alvo,
         valor_atual=orm.valor_atual,
         criada_em=orm.criada_em,
@@ -27,7 +27,7 @@ def model_to_orm_new(model: Meta) -> MetaORM:
         id_meta=model.id_meta,
         fk_pessoa_id_pessoa=model.fk_pessoa_id_pessoa,
         titulo=model.titulo,
-        descricao=model.descricao,
+        categoria=model.categoria,
         valor_alvo=model.valor_alvo,
         valor_atual=model.valor_atual,
         criada_em=model.criada_em,
@@ -40,7 +40,7 @@ def update_orm_from_model(orm: MetaORM, model: Meta) -> MetaORM:
     """Atualiza instância de MetaORM existente com dados de Meta (domain)."""
     orm.fk_pessoa_id_pessoa = model.fk_pessoa_id_pessoa
     orm.titulo = model.titulo
-    orm.descricao = model.descricao
+    orm.categoria = model.categoria
     orm.valor_alvo = model.valor_alvo
     orm.valor_atual = model.valor_atual
     orm.criada_em = model.criada_em

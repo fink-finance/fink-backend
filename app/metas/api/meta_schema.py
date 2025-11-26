@@ -13,12 +13,12 @@ class MetaBase(BaseModel):
         description="Título da meta",
         examples=["Comprar apartamento"]
     )
-    descricao: str = Field(
+    categoria: str = Field(
         ..., 
         min_length=1, 
         max_length=500,
-        description="Descrição detalhada da meta",
-        examples=["Juntar R$ 100.000 para dar entrada em um apartamento"]
+        description="Categoria da meta financeira",
+        examples=["Investimento", "Reserva de Emergência", "Viagem", "Educação"]
     )
     valor_alvo: Decimal = Field(
         ...,
@@ -48,7 +48,7 @@ class MetaCreate(MetaBase):
         json_schema_extra={
             "example": {
                 "titulo": "Viagem para Europa",
-                "descricao": "Economizar para viagem de férias",
+                "categoria": "Viagem",
                 "valor_alvo": 15000.00,
                 "termina_em": "2026-06-01"
             }
@@ -71,11 +71,11 @@ class MetaUpdate(BaseModel):
         max_length=100,
         description="Novo título da meta"
     )
-    descricao: Optional[str] = Field(
+    categoria: Optional[str] = Field(
         None, 
         min_length=1, 
         max_length=500,
-        description="Nova descrição da meta"
+        description="Nova categoria da meta"
     )
     valor_alvo: Optional[Decimal] = Field(
         None, 

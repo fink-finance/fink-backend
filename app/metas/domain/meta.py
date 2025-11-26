@@ -3,6 +3,47 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from enum import Enum
+
+
+class CategoriaMetaEnum(str, Enum):
+    """Categorias permitidas para metas financeiras."""
+    EMERGENCIA = "Emergência"
+    INVESTIMENTO = "Investimento"
+    VIAGEM = "Viagem"
+    EDUCACAO = "Educação"
+    DIVIDAS = "Dívidas"
+    MORADIA = "Moradia"
+    VEICULO = "Veículo"
+    INTERCAMBIO = "Intercâmbio"
+    SEGURANCA = "Segurança"
+    SAUDE = "Saúde"
+    OUTROS = "Outros"  # Categoria padrão
+    
+    @classmethod
+    def get_default(cls) -> str:
+        """Retorna a categoria padrão."""
+        return cls.OUTROS.value
+    
+    @classmethod
+    def is_valid(cls, categoria: str | None) -> bool:
+        """Verifica se a categoria é válida."""
+        if not categoria:
+            return False
+        return categoria in [c.value for c in cls]
+    
+    @classmethod
+    def normalize(cls, categoria: str | None) -> str:
+        """Normaliza a categoria: se inválida ou vazia, retorna padrão."""
+        if not categoria or not categoria.strip():
+            return cls.get_default()
+        
+        # Verifica se é uma categoria válida
+        if cls.is_valid(categoria):
+            return categoria
+        
+        # Categoria inválida: retorna padrão
+        return cls.get_default()
 
 
 @dataclass
@@ -20,8 +61,12 @@ class Meta:
     def __post_init__(self) -> None:
         if not self.titulo or not self.titulo.strip():
             raise ValueError("Título é obrigatório")
+        
+        # Normaliza categoria: se vazia ou inválida, usa padrão
         if not self.categoria or not self.categoria.strip():
-            raise ValueError("Categoria é obrigatória")
+            object.__setattr__(self, 'categoria', CategoriaMetaEnum.get_default())
+        elif not CategoriaMetaEnum.is_valid(self.categoria):
+            object.__setattr__(self, 'categoria', CategoriaMetaEnum.get_default())
         if not self.fk_pessoa_id_pessoa or self.fk_pessoa_id_pessoa <= 0:
             raise ValueError("ID da pessoa é obrigatório e deve ser maior que zero")
         if self.valor_alvo <= 0:

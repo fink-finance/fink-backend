@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any
 from sqlalchemy.exc import IntegrityError
 
-from app.metas.domain.meta import Meta
+from app.metas.domain.meta import Meta, CategoriaMetaEnum
 from app.metas.repositories.meta_repository import MetaRepository
 from app.metas.mappers.meta_mapper import orm_to_model, model_to_orm_new
 
@@ -49,13 +49,24 @@ class MetaService:
         obrigatorios = [
             "fk_pessoa_id_pessoa",
             "titulo",
-            "categoria",
             "valor_alvo",
             "termina_em",
         ]
         for campo in obrigatorios:
             if not dados.get(campo):
                 raise ValueError(f"O campo '{campo}' é obrigatório.")
+        
+        # ⚠️ COMPATIBILIDADE TEMPORÁRIA: aceita "descricao" como alias de "categoria"
+        # TODO: Remover após frontend ser atualizado
+        if "descricao" in dados and "categoria" not in dados:
+            dados["categoria"] = dados.pop("descricao")
+        
+        # Remove descricao se vier junto (prioriza categoria)
+        dados.pop("descricao", None)
+        
+        # Normaliza categoria: se vazia/nula/inválida, usa padrão "Outros"
+        categoria = dados.get("categoria")
+        dados["categoria"] = CategoriaMetaEnum.normalize(categoria)
 
         valor_alvo = Decimal(str(dados.get("valor_alvo", "0")))
         if valor_alvo <= 0:
@@ -66,7 +77,6 @@ class MetaService:
             raise ValueError("A data de término não pode ser anterior à data atual.")
 
         # Preenche campos padrão/automáticos
-        dados.setdefault("descricao", "")
         dados.setdefault("criada_em", date.today())
         dados.setdefault("status", "em_andamento")
         dados.setdefault("valor_atual", Decimal("0"))  # Sempre inicia em 0

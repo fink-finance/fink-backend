@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -13,12 +13,22 @@ class MetaBase(BaseModel):
         description="Título da meta",
         examples=["Comprar apartamento"]
     )
-    categoria: str = Field(
-        ..., 
-        min_length=1, 
-        max_length=500,
-        description="Categoria da meta financeira",
-        examples=["Investimento", "Reserva de Emergência", "Viagem", "Educação"]
+    categoria: Optional[Literal[
+        "Emergência",
+        "Investimento", 
+        "Viagem", 
+        "Educação",
+        "Dívidas",
+        "Moradia",
+        "Veículo",
+        "Intercâmbio",
+        "Segurança",
+        "Saúde",
+        "Outros"
+    ]] = Field(
+        default=None,
+        description="Categoria da meta financeira (opcional, padrão: 'Outros')",
+        examples=["Investimento", "Viagem", "Educação", "Intercâmbio", "Saúde"]
     )
     valor_alvo: Decimal = Field(
         ...,
@@ -46,12 +56,19 @@ class MetaCreate(MetaBase):
     
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {
-                "titulo": "Viagem para Europa",
-                "categoria": "Viagem",
-                "valor_alvo": 15000.00,
-                "termina_em": "2026-06-01"
-            }
+            "examples": [
+                {
+                    "titulo": "Viagem para Europa",
+                    "categoria": "Viagem",
+                    "valor_alvo": 15000.00,
+                    "termina_em": "2026-06-01"
+                },
+                {
+                    "titulo": "Comprar Notebook",
+                    "valor_alvo": 5000.00,
+                    "termina_em": "2026-03-01"
+                }
+            ]
         }
     )
 

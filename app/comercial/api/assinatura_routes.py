@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.shared.database import async_session_maker
 from app.comercial.repositories.assinatura_repository_impl import AssinaturaRepositoryImpl
 from app.comercial.services.assinatura_service import AssinaturaService
+from app.api.deps import get_current_user_id  # <-- NOVO: pega o id do usuário autenticado
 from .assinatura_schema import (
     AssinaturaCreate,
     AssinaturaResponse,
@@ -45,10 +46,14 @@ async def get_assinatura_service(
 async def criar_assinatura(
     assinatura: AssinaturaCreate,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
-    """Cria uma nova assinatura."""
+    """Cria uma nova assinatura para o usuário autenticado."""
     try:
         dados = assinatura.model_dump()
+        # Garante que a assinatura pertence ao usuário logado
+        dados["fk_pessoa_id_pessoa"] = user_id  # <-- NOVO
+
         criada = await service.criar(dados)
         return AssinaturaResponse.model_validate(criada.__dict__)
     except ValueError as e:
@@ -80,10 +85,19 @@ async def listar_assinaturas(
 async def buscar_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
-    """Busca uma assinatura por ID."""
+    """Busca uma assinatura por ID, apenas se pertencer ao usuário autenticado."""
     try:
         assinatura = await service.buscar_por_id(id_assinatura)
+
+        # Verifica se a assinatura pertence ao usuário logado  <-- NOVO
+        if assinatura.fk_pessoa_id_pessoa != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para acessar esta assinatura",
+            )
+
         return AssinaturaResponse.model_validate(assinatura.__dict__)
     except ValueError as e:
         raise HTTPException(
@@ -100,9 +114,18 @@ async def atualizar_assinatura(
     id_assinatura: int,
     assinatura: AssinaturaUpdate,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
-    """Atualiza parcialmente uma assinatura existente."""
+    """Atualiza parcialmente uma assinatura existente do usuário autenticado."""
     try:
+        # Verifica se a assinatura pertence ao usuário antes de atualizar  <-- NOVO
+        assinatura_atual = await service.buscar_por_id(id_assinatura)
+        if assinatura_atual.fk_pessoa_id_pessoa != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para atualizar esta assinatura",
+            )
+
         dados = assinatura.model_dump(exclude_unset=True)
         atualizada = await service.atualizar(id_assinatura, dados)
         return AssinaturaResponse.model_validate(atualizada.__dict__)
@@ -117,9 +140,18 @@ async def atualizar_assinatura(
 async def remover_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ):
-    """Remove uma assinatura."""
+    """Remove uma assinatura do usuário autenticado."""
     try:
+        # Verifica se a assinatura pertence ao usuário antes de remover  <-- NOVO
+        assinatura_atual = await service.buscar_por_id(id_assinatura)
+        if assinatura_atual.fk_pessoa_id_pessoa != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para remover esta assinatura",
+            )
+
         await service.remover(id_assinatura)
         return {"message": "Assinatura removida com sucesso"}
     except ValueError as e:
@@ -141,9 +173,18 @@ async def renovar_assinatura(
     id_assinatura: int,
     meses: int = 1,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
-    """Renova uma assinatura existente."""
+    """Renova uma assinatura existente do usuário autenticado."""
     try:
+        # Verifica se a assinatura pertence ao usuário antes de renovar  <-- NOVO
+        assinatura_atual = await service.buscar_por_id(id_assinatura)
+        if assinatura_atual.fk_pessoa_id_pessoa != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para renovar esta assinatura",
+            )
+
         renovada = await service.renovar(id_assinatura, meses)
         return AssinaturaResponse.model_validate(renovada.__dict__)
     except ValueError as e:
@@ -160,9 +201,18 @@ async def renovar_assinatura(
 async def cancelar_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
+    user_id: int = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
-    """Cancela uma assinatura (status='cancelada')."""
+    """Cancela uma assinatura (status='cancelada') do usuário autenticado."""
     try:
+        # Verifica se a assinatura pertence ao usuário antes de cancelar  <-- NOVO
+        assinatura_atual = await service.buscar_por_id(id_assinatura)
+        if assinatura_atual.fk_pessoa_id_pessoa != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você não tem permissão para cancelar esta assinatura",
+            )
+
         cancelada = await service.cancelar(id_assinatura)
         return AssinaturaResponse.model_validate(cancelada.__dict__)
     except ValueError as e:

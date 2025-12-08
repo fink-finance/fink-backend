@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from typing import Protocol
-from collections.abc import Iterable  # <- usar daqui
+from collections.abc import Iterable
+from uuid import UUID
+
 from app.alertas.persistence.alerta_orm import AlertaORM
 
 
@@ -9,7 +11,7 @@ class AlertaRepository(Protocol):
     """Contrato que define as operações para o repositório de Alertas."""
 
     async def get_by_id(self, id_alerta: int) -> AlertaORM | None: ...
-    async def list_by_pessoa(self, id_pessoa: int) -> Iterable[AlertaORM]: ...
+    async def list_by_pessoa(self, id_pessoa: UUID) -> Iterable[AlertaORM]: ...
     async def list_by_meta(self, id_meta: int) -> Iterable[AlertaORM]: ...
     async def list_all(self) -> Iterable[AlertaORM]: ...
     async def add(self, alerta: AlertaORM) -> AlertaORM: ...

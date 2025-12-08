@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,7 @@ class AssinaturaRepositoryImpl(AssinaturaRepository):
         """Busca uma assinatura pelo ID."""
         return await self.session.get(AssinaturaORM, id_assinatura)
 
-    async def list_by_pessoa(self, id_pessoa: int) -> list[AssinaturaORM]:
+    async def list_by_pessoa(self, id_pessoa: UUID) -> list[AssinaturaORM]:
         """Lista todas as assinaturas de uma pessoa."""
         result = await self.session.execute(select(AssinaturaORM).where(AssinaturaORM.fk_pessoa_id_pessoa == id_pessoa))
         return list(result.scalars())

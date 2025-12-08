@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,7 @@ class AlertaRepositoryImpl(AlertaRepository):
         """Busca um alerta pelo ID."""
         return await self.session.get(AlertaORM, id_alerta)
 
-    async def list_by_pessoa(self, id_pessoa: int) -> list[AlertaORM]:
+    async def list_by_pessoa(self, id_pessoa: UUID) -> list[AlertaORM]:
         """Lista todos os alertas de uma pessoa específica."""
         result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa))
         return list(result.scalars())

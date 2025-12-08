@@ -3,8 +3,10 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from sqlalchemy import CheckConstraint, Date, Numeric, ForeignKey, Integer, String, func
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
@@ -19,8 +21,8 @@ class MetaORM(Base):
 
     id_meta: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    fk_pessoa_id_pessoa: Mapped[int] = mapped_column(
-        Integer, ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
+    fk_pessoa_id_pessoa: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True), ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
     )
 
     titulo: Mapped[str] = mapped_column(String(100), nullable=False)

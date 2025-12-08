@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +19,7 @@ class MetaRepositoryImpl(MetaRepository):
         """Busca uma meta pelo ID."""
         return await self.session.get(MetaORM, id_meta)
 
-    async def list_by_pessoa(self, id_pessoa: int) -> list[MetaORM]:
+    async def list_by_pessoa(self, id_pessoa: UUID) -> list[MetaORM]:
         """Lista todas as metas de uma pessoa."""
         result = await self.session.execute(select(MetaORM).where(MetaORM.fk_pessoa_id_pessoa == id_pessoa))
         return list(result.scalars())  # <- lista real

@@ -1,4 +1,6 @@
 from typing import List, Dict
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from collections.abc import AsyncGenerator
@@ -30,7 +32,7 @@ async def get_alerta_service(session: AsyncSession = Depends(get_db)) -> AlertaS
 async def create_alerta(
     alerta: AlertaCreate,
     service: AlertaService = Depends(get_alerta_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> AlertaResponse:
     """
     Cria um novo alerta para o usuário autenticado.
@@ -51,7 +53,7 @@ async def create_alerta(
 @router.get("/", response_model=List[AlertaResponse])
 async def list_alertas(
     service: AlertaService = Depends(get_alerta_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> List[AlertaResponse]:
     """
     Lista todos os alertas do usuário autenticado.
@@ -64,7 +66,7 @@ async def list_alertas(
 async def get_alerta(
     id_alerta: int,
     service: AlertaService = Depends(get_alerta_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> AlertaResponse:
     """
     Busca um alerta pelo ID, apenas se ele pertencer ao usuário autenticado.
@@ -88,7 +90,7 @@ async def update_alerta(
     id_alerta: int,
     alerta_update: AlertaUpdate,
     service: AlertaService = Depends(get_alerta_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> AlertaResponse:
     """
     Atualiza um alerta existente, apenas se ele pertencer ao usuário autenticado.
@@ -112,7 +114,7 @@ async def update_alerta(
 async def delete_alerta(
     id_alerta: int,
     service: AlertaService = Depends(get_alerta_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> Dict[str, str]:
     """
     Remove um alerta, apenas se ele pertencer ao usuário autenticado.

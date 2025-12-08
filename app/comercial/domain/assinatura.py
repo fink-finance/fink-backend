@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from uuid import UUID
 
 
 @dataclass
 class Assinatura:
     id_assinatura: int | None
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     fk_plano_id_plano: int
     comeca_em: date
     termina_em: date

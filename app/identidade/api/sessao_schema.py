@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pydantic import BaseModel, EmailStr
 from datetime import date
+from uuid import UUID
 
 
 class LoginRequest(BaseModel):
@@ -12,7 +13,7 @@ class SessaoCriadaResponse(BaseModel):
     """Resposta do login: retorna o token em claro uma única vez."""
 
     id_sessao: int
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     token: str
     criada_em: date
     expira_em: date
@@ -23,7 +24,7 @@ class SessaoCriadaResponse(BaseModel):
 
 class SessaoResponse(BaseModel):
     id_sessao: int
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     criada_em: date
     expira_em: date
 

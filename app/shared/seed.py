@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,8 +54,11 @@ async def clear_demo_data(session: AsyncSession) -> None:
     
     if pessoa:
         print(f"[SEED] Removendo pessoa demo (ID: {pessoa.id_pessoa}) e dados relacionados...")
-        # Delete em cascata remove: metas, alertas, sessões, assinaturas, etc.
-        await session.delete(pessoa)
+        # Usa DELETE explícito para evitar problemas com tipos
+        # O CASCADE no banco remove automaticamente: metas, alertas, sessões, assinaturas, etc.
+        from sqlalchemy import delete
+        stmt = delete(PessoaORM).where(PessoaORM.id_pessoa == pessoa.id_pessoa)
+        await session.execute(stmt)
         await session.commit()
         print("[SEED] Dados demo removidos com sucesso!")
     else:
@@ -363,7 +367,7 @@ async def seed_alertas_demo(
 
 async def _create_alert(
     session: AsyncSession,
-    pessoa_id: int,
+    pessoa_id: UUID,
     meta_id: int | None,
     parametro: str,
     acao: str,

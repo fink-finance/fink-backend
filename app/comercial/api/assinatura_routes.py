@@ -1,4 +1,5 @@
 from typing import List, AsyncGenerator
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,7 +47,7 @@ async def get_assinatura_service(
 async def criar_assinatura(
     assinatura: AssinaturaCreate,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
     """Cria uma nova assinatura para o usuário autenticado."""
     try:
@@ -85,7 +86,7 @@ async def listar_assinaturas(
 async def buscar_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
     """Busca uma assinatura por ID, apenas se pertencer ao usuário autenticado."""
     try:
@@ -114,7 +115,7 @@ async def atualizar_assinatura(
     id_assinatura: int,
     assinatura: AssinaturaUpdate,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
     """Atualiza parcialmente uma assinatura existente do usuário autenticado."""
     try:
@@ -140,7 +141,7 @@ async def atualizar_assinatura(
 async def remover_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ):
     """Remove uma assinatura do usuário autenticado."""
     try:
@@ -173,7 +174,7 @@ async def renovar_assinatura(
     id_assinatura: int,
     meses: int = 1,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
     """Renova uma assinatura existente do usuário autenticado."""
     try:
@@ -201,7 +202,7 @@ async def renovar_assinatura(
 async def cancelar_assinatura(
     id_assinatura: int,
     service: AssinaturaService = Depends(get_assinatura_service),
-    user_id: int = Depends(get_current_user_id),  # <-- NOVO
+    user_id: UUID = Depends(get_current_user_id),  # <-- NOVO
 ) -> AssinaturaResponse:
     """Cancela uma assinatura (status='cancelada') do usuário autenticado."""
     try:

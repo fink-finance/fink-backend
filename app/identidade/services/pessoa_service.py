@@ -1,5 +1,7 @@
 from datetime import date
 from typing import Sequence, Any
+from uuid import UUID
+
 from app.identidade.domain.pessoa import Pessoa
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.repositories.pessoa_repository import PessoaRepository
@@ -41,7 +43,7 @@ class PessoaService:
         pessoas_orm = await self.repo.list_all()
         return [orm_to_model(p) for p in pessoas_orm] if pessoas_orm else []
 
-    async def buscar_por_id(self, id_pessoa: int) -> Pessoa:
+    async def buscar_por_id(self, id_pessoa: UUID) -> Pessoa:
         """Busca uma pessoa por ID."""
         pessoa_orm = await self.repo.get_by_id(id_pessoa)
         if not pessoa_orm:
@@ -55,7 +57,7 @@ class PessoaService:
             raise ValueError("Nenhum cadastro encontrado para esse e-mail.")
         return orm_to_model(pessoa_orm)
 
-    async def atualizar(self, id_pessoa: int, pessoa_data: dict[str, Any]) -> Pessoa:
+    async def atualizar(self, id_pessoa: UUID, pessoa_data: dict[str, Any]) -> Pessoa:
         """Atualiza uma pessoa existente."""
         try:
             # Verifica se a pessoa existe
@@ -86,7 +88,7 @@ class PessoaService:
         except Exception as e:
             raise ValueError(f"Erro ao atualizar pessoa: {str(e)}")
 
-    async def remover(self, id_pessoa: int) -> None:
+    async def remover(self, id_pessoa: UUID) -> None:
         """Remove uma pessoa existente."""
         pessoa = await self.repo.get_by_id(id_pessoa)
         if not pessoa:

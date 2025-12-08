@@ -4,6 +4,7 @@ import hashlib
 import secrets
 from datetime import date, timedelta
 from typing import Any, Sequence
+from uuid import UUID
 
 from app.identidade.domain.sessao import Sessao as SessaoDomain
 from app.identidade.mappers.sessao_mapper import orm_to_model, model_to_orm_new
@@ -65,10 +66,10 @@ class SessaoService:
     async def encerrar_por_id(self, id_sessao: int) -> None:
         await self.sessao_repo.delete_by_id(id_sessao)
 
-    async def encerrar_todas_de_pessoa(self, id_pessoa: int) -> int:
+    async def encerrar_todas_de_pessoa(self, id_pessoa: UUID) -> int:
         return await self.sessao_repo.delete_all_for_pessoa(id_pessoa)
 
-    async def listar_por_pessoa(self, id_pessoa: int) -> list[SessaoDomain]:
+    async def listar_por_pessoa(self, id_pessoa: UUID) -> list[SessaoDomain]:
         itens = await self.sessao_repo.list_by_pessoa(id_pessoa)
         return [orm_to_model(i) for i in itens]
 

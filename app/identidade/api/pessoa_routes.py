@@ -1,4 +1,6 @@
 from typing import List
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,9 +45,9 @@ async def list_pessoas(
 
 @router.get("/{id_pessoa}", response_model=PessoaResponse)
 async def get_pessoa(
-    id_pessoa: int,
+    id_pessoa: UUID,
     service: PessoaService = Depends(get_pessoa_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> PessoaResponse:
     """
     Busca uma pessoa por ID.
@@ -80,10 +82,10 @@ async def get_pessoa_by_email(
 
 @router.patch("/{id_pessoa}", response_model=PessoaResponse)
 async def update_pessoa(
-    id_pessoa: int,
+    id_pessoa: UUID,
     pessoa: PessoaUpdate,
     service: PessoaService = Depends(get_pessoa_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ) -> PessoaResponse:
     """
     Atualiza parcialmente uma pessoa existente.
@@ -105,9 +107,9 @@ async def update_pessoa(
 
 @router.delete("/{id_pessoa}")
 async def delete_pessoa(
-    id_pessoa: int,
+    id_pessoa: UUID,
     service: PessoaService = Depends(get_pessoa_service),
-    user_id: int = Depends(get_current_user_id),
+    user_id: UUID = Depends(get_current_user_id),
 ):
     """
     Remove uma pessoa.

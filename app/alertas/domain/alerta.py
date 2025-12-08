@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from uuid import UUID
 
 
 @dataclass
 class Alerta:
     id_alerta: int | None
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     parametro: str
     acao: str
     valor: float

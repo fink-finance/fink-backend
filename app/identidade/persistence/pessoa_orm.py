@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from datetime import date
+from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, Date, Integer, String, func
+from sqlalchemy import Boolean, Date, String, func
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
@@ -11,7 +13,9 @@ from app.shared.database import Base
 class PessoaORM(Base):
     __tablename__ = "pessoa"
 
-    id_pessoa: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_pessoa: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     senha: Mapped[str] = mapped_column(String, nullable=False)
     nome: Mapped[str] = mapped_column(String, nullable=False)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from uuid import UUID
 
 
 @dataclass
@@ -11,7 +12,7 @@ class Sessao:
     """Representa uma sessão de autenticação de um usuário."""
 
     id_sessao: int | None
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     token_hash: str
     criada_em: date
     expira_em: date

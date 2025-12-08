@@ -1,6 +1,8 @@
 from datetime import date
 from decimal import Decimal
 from typing import Optional, Literal
+from uuid import UUID
+
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -134,9 +136,8 @@ class MetaResponse(MetaBase):
         gt=0,
         description="ID único da meta"
     )
-    fk_pessoa_id_pessoa: int = Field(
+    fk_pessoa_id_pessoa: UUID = Field(
         ...,
-        gt=0,
         description="ID do usuário proprietário da meta"
     )
     valor_atual: Decimal = Field(
@@ -159,7 +160,7 @@ class MetaResponse(MetaBase):
         json_schema_extra={
             "example": {
                 "id_meta": 1,
-                "fk_pessoa_id_pessoa": 123,
+                "fk_pessoa_id_pessoa": "550e8400-e29b-41d4-a716-446655440000",
                 "titulo": "Viagem para Europa",
                 "descricao": "Economizar para viagem de férias",
                 "valor_alvo": 15000.00,

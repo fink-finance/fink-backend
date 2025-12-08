@@ -1,11 +1,12 @@
 from datetime import date
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
 class AssinaturaBase(BaseModel):
-    fk_pessoa_id_pessoa: int = Field(..., description="ID da pessoa dona da assinatura")
+    fk_pessoa_id_pessoa: UUID = Field(..., description="ID da pessoa dona da assinatura")
     fk_plano_id_plano: int = Field(..., description="ID do plano assinado")
     comeca_em: date = Field(..., description="Data de início da assinatura")
     termina_em: date = Field(..., description="Data de término da assinatura")

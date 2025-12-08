@@ -2,6 +2,7 @@
 
 from collections.abc import Iterable
 from typing import Protocol
+from uuid import UUID
 
 from app.comercial.persistence.assinatura_orm import AssinaturaORM
 
@@ -13,7 +14,7 @@ class AssinaturaRepository(Protocol):
         """Busca assinatura por ID."""
         ...
 
-    async def list_by_pessoa(self, id_pessoa: int) -> Iterable[AssinaturaORM]:
+    async def list_by_pessoa(self, id_pessoa: UUID) -> Iterable[AssinaturaORM]:
         """Lista assinaturas por pessoa."""
         ...
 

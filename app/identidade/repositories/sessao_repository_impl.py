@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import date
+from uuid import UUID
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,7 +33,7 @@ class SessaoRepositoryImpl(SessaoRepository):
         res = await self.session.execute(select(SessaoORM).where(SessaoORM.token_hash == token_hash))
         return res.scalar_one_or_none()
 
-    async def list_by_pessoa(self, id_pessoa: int) -> list[SessaoORM]:
+    async def list_by_pessoa(self, id_pessoa: UUID) -> list[SessaoORM]:
         res = await self.session.execute(
             select(SessaoORM).where(SessaoORM.fk_pessoa_id_pessoa == id_pessoa).order_by(SessaoORM.criada_em.desc())
         )
@@ -45,7 +47,7 @@ class SessaoRepositoryImpl(SessaoRepository):
         await self.session.execute(delete(SessaoORM).where(SessaoORM.token_hash == token_hash))
         await self.session.commit()
 
-    async def delete_all_for_pessoa(self, id_pessoa: int) -> int:
+    async def delete_all_for_pessoa(self, id_pessoa: UUID) -> int:
         res = await self.session.execute(delete(SessaoORM).where(SessaoORM.fk_pessoa_id_pessoa == id_pessoa))
         await self.session.commit()
         return res.rowcount or 0

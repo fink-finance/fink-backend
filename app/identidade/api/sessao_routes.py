@@ -1,4 +1,6 @@
 from typing import List, AsyncGenerator
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,7 +82,7 @@ async def logout(
 
 @router.get("/pessoa/{id_pessoa}", response_model=List[SessaoResponse])
 async def listar_por_pessoa(
-    id_pessoa: int, service: SessaoService = Depends(get_sessao_service)
+    id_pessoa: UUID, service: SessaoService = Depends(get_sessao_service)
 ) -> List[SessaoResponse]:
     """Lista sessões da pessoa."""
     try:
@@ -91,7 +93,7 @@ async def listar_por_pessoa(
 
 
 @router.delete("/pessoa/{id_pessoa}/todas", status_code=status.HTTP_200_OK)
-async def encerrar_todas(id_pessoa: int, service: SessaoService = Depends(get_sessao_service)):
+async def encerrar_todas(id_pessoa: UUID, service: SessaoService = Depends(get_sessao_service)):
     """Remove todas as sessões da pessoa."""
     try:
         count = await service.encerrar_todas_de_pessoa(id_pessoa)

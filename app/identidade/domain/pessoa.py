@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from uuid import UUID
 
 
 @dataclass
 class Pessoa:
-    id_pessoa: int | None
+    id_pessoa: UUID | None
     email: str
     senha: str
     nome: str

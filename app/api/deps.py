@@ -1,5 +1,7 @@
 """Dependências compartilhadas da API."""
 from typing import AsyncGenerator
+from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,7 +32,7 @@ async def get_sessao_service(session: AsyncSession = Depends(get_db)) -> SessaoS
 async def get_current_user_id(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     sessao_service: SessaoService = Depends(get_sessao_service),
-) -> int:
+) -> UUID:
     """
     Valida o token Bearer e retorna o ID do usuário autenticado.
     

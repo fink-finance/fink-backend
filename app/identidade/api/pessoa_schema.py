@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
 from typing import Optional
+from uuid import UUID
 
 
 class PessoaBase(BaseModel):
@@ -32,7 +33,7 @@ class PessoaUpdate(BaseModel):
 
 
 class PessoaResponse(PessoaBase):
-    id_pessoa: int
+    id_pessoa: UUID
     data_criacao: date
     admin: bool = False
 

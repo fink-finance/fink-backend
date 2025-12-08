@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from enum import Enum
+from uuid import UUID
 
 
 class CategoriaMetaEnum(str, Enum):
@@ -49,7 +50,7 @@ class CategoriaMetaEnum(str, Enum):
 @dataclass
 class Meta:
     id_meta: int | None
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     titulo: str
     categoria: str
     valor_alvo: Decimal
@@ -67,8 +68,8 @@ class Meta:
             object.__setattr__(self, 'categoria', CategoriaMetaEnum.get_default())
         elif not CategoriaMetaEnum.is_valid(self.categoria):
             object.__setattr__(self, 'categoria', CategoriaMetaEnum.get_default())
-        if not self.fk_pessoa_id_pessoa or self.fk_pessoa_id_pessoa <= 0:
-            raise ValueError("ID da pessoa é obrigatório e deve ser maior que zero")
+        if not self.fk_pessoa_id_pessoa:
+            raise ValueError("ID da pessoa é obrigatório")
         if self.valor_alvo <= 0:
             raise ValueError("Valor alvo deve ser maior que zero")
         if self.valor_atual < 0:

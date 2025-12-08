@@ -1,4 +1,6 @@
 from typing import List
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,7 +21,7 @@ async def get_meta_service(session: AsyncSession = Depends(get_db)) -> MetaServi
 async def create_meta(
     meta: MetaCreate,
     service: MetaService = Depends(get_meta_service),
-    user_id: int = Depends(get_current_user_id)
+    user_id: UUID = Depends(get_current_user_id)
 ) -> MetaResponse:
     """Cria uma nova meta financeira para o usuário autenticado.
     
@@ -39,7 +41,7 @@ async def create_meta(
 @router.get("/", response_model=List[MetaResponse])
 async def list_metas(
     service: MetaService = Depends(get_meta_service),
-    user_id: int = Depends(get_current_user_id)
+    user_id: UUID = Depends(get_current_user_id)
 ) -> List[MetaResponse]:
     """Lista todas as metas do usuário autenticado."""
     try:
@@ -53,7 +55,7 @@ async def list_metas(
 async def get_meta(
     id_meta: int,
     service: MetaService = Depends(get_meta_service),
-    user_id: int = Depends(get_current_user_id)
+    user_id: UUID = Depends(get_current_user_id)
 ) -> MetaResponse:
     """Busca uma meta específica do usuário autenticado."""
     try:
@@ -76,7 +78,7 @@ async def update_meta(
     id_meta: int,
     meta: MetaUpdate,
     service: MetaService = Depends(get_meta_service),
-    user_id: int = Depends(get_current_user_id)
+    user_id: UUID = Depends(get_current_user_id)
 ) -> MetaResponse:
     """Atualiza parcialmente uma meta do usuário autenticado."""
     try:
@@ -98,7 +100,7 @@ async def update_meta(
 async def delete_meta(
     id_meta: int,
     service: MetaService = Depends(get_meta_service),
-    user_id: int = Depends(get_current_user_id)
+    user_id: UUID = Depends(get_current_user_id)
 ):
     """Remove uma meta do usuário autenticado."""
     try:

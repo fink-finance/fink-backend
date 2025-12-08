@@ -1,5 +1,8 @@
 from typing import Any, List
+from uuid import UUID
+
 from sqlalchemy.exc import IntegrityError
+
 from app.alertas.persistence.alerta_orm import AlertaORM
 from app.alertas.repositories.alerta_repository import AlertaRepository
 
@@ -18,7 +21,7 @@ class AlertaService:
         """Lista todos os alertas cadastrados (uso administrativo)."""
         return await self.repo.list_all()
 
-    async def listar_por_pessoa(self, id_pessoa: int) -> List[AlertaORM]:
+    async def listar_por_pessoa(self, id_pessoa: UUID) -> List[AlertaORM]:
         """Lista todos os alertas vinculados a uma pessoa."""
         return await self.repo.list_by_pessoa(id_pessoa)
 
@@ -99,7 +102,7 @@ class AlertaService:
     # Regras de negócio adicionais (opcional)
     # -------------------------------------------------------------------------
 
-    async def avaliar_alerta(self, parametro: str, valor_referencia: float, id_pessoa: int) -> List[AlertaORM]:
+    async def avaliar_alerta(self, parametro: str, valor_referencia: float, id_pessoa: UUID) -> List[AlertaORM]:
         """
         Avalia todos os alertas de uma pessoa para um determinado parâmetro,
         retornando os que foram 'disparados' (condição verdadeira).

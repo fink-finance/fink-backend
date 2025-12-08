@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 from typing import Optional
+from uuid import UUID
 
 
 class AlertaBase(BaseModel):
     parametro: str
     acao: str
     valor: float
-    fk_pessoa_id_pessoa: int
+    fk_pessoa_id_pessoa: UUID
     fk_meta_id_meta: Optional[int] = None
 
 
@@ -18,7 +19,7 @@ class AlertaUpdate(BaseModel):
     parametro: Optional[str] = None
     acao: Optional[str] = None
     valor: Optional[float] = None
-    fk_pessoa_id_pessoa: Optional[int] = None
+    fk_pessoa_id_pessoa: Optional[UUID] = None
     fk_meta_id_meta: Optional[int] = None
 
 

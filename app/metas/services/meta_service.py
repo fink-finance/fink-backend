@@ -1,6 +1,8 @@
 from datetime import date
 from decimal import Decimal
 from typing import Any
+from uuid import UUID
+
 from sqlalchemy.exc import IntegrityError
 
 from app.metas.domain.meta import Meta, CategoriaMetaEnum
@@ -23,7 +25,7 @@ class MetaService:
         metas_orm = await self.repo.list_all()
         return [orm_to_model(meta) for meta in metas_orm]
 
-    async def listar_por_pessoa(self, id_pessoa: int) -> list[Meta]:
+    async def listar_por_pessoa(self, id_pessoa: UUID) -> list[Meta]:
         """Lista todas as metas vinculadas a uma pessoa."""
         metas_orm = await self.repo.list_by_pessoa(id_pessoa)
         return [orm_to_model(meta) for meta in metas_orm] if metas_orm else []

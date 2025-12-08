@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import Float, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.database import Base
@@ -11,8 +14,8 @@ class AlertaORM(Base):
 
     id_alerta: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    fk_pessoa_id_pessoa: Mapped[int] = mapped_column(
-        Integer, ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
+    fk_pessoa_id_pessoa: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True), ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
     )
 
     parametro: Mapped[str] = mapped_column(String, nullable=False)

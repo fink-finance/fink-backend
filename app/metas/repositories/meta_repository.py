@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from typing import Protocol
-from collections.abc import Iterable  # <- em vez de typing.Iterable
+from collections.abc import Iterable
+from uuid import UUID
+
 from app.metas.persistence.meta_orm import MetaORM
 
 
@@ -9,7 +11,7 @@ class MetaRepository(Protocol):
     """Contrato que define o comportamento esperado do repositório de Meta."""
 
     async def get_by_id(self, id_meta: int) -> MetaORM | None: ...
-    async def list_by_pessoa(self, id_pessoa: int) -> Iterable[MetaORM]: ...
+    async def list_by_pessoa(self, id_pessoa: UUID) -> Iterable[MetaORM]: ...
     async def list_all(self) -> Iterable[MetaORM]: ...
     async def add(self, meta: MetaORM) -> MetaORM: ...
     async def update(self, meta: MetaORM) -> MetaORM: ...

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +32,7 @@ class PessoaRepositoryImpl(PessoaRepository):
         await self.session.commit()  # Add commit here
         return list(result.scalars().all())
 
-    async def get_by_id(self, id_pessoa: int) -> PessoaORM | None:
+    async def get_by_id(self, id_pessoa: UUID) -> PessoaORM | None:
         stmt = select(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa)
         result = await self.session.execute(stmt)
         pessoa = result.scalar_one_or_none()
@@ -47,7 +49,7 @@ class PessoaRepositoryImpl(PessoaRepository):
         await self.session.commit()  # Add commit here
         return pessoa
 
-    async def delete(self, id_pessoa: int) -> None:
+    async def delete(self, id_pessoa: UUID) -> None:
         stmt = delete(PessoaORM).where(PessoaORM.id_pessoa == id_pessoa)
         await self.session.execute(stmt)
         await self.session.commit()  # Add commit here

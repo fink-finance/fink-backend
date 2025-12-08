@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 from typing import Any, List
+from uuid import UUID
+
 from sqlalchemy.exc import IntegrityError
 
 from app.comercial.persistence.assinatura_orm import AssinaturaORM
@@ -20,7 +22,7 @@ class AssinaturaService:
         """Lista todas as assinaturas (uso administrativo)."""
         return await self.repo.list_all()
 
-    async def listar_por_pessoa(self, id_pessoa: int) -> List[AssinaturaORM]:
+    async def listar_por_pessoa(self, id_pessoa: UUID) -> List[AssinaturaORM]:
         """Lista todas as assinaturas vinculadas a uma pessoa."""
         return await self.repo.list_by_pessoa(id_pessoa)
 

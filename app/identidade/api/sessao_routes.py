@@ -1,7 +1,7 @@
 from typing import List, AsyncGenerator
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -82,7 +82,8 @@ async def logout(
 
 @router.get("/pessoa/{id_pessoa}", response_model=List[SessaoResponse])
 async def listar_por_pessoa(
-    id_pessoa: UUID, service: SessaoService = Depends(get_sessao_service)
+    id_pessoa: UUID = Path(..., description="ID único da pessoa (UUID)", example="550e8400-e29b-41d4-a716-446655440000"),
+    service: SessaoService = Depends(get_sessao_service)
 ) -> List[SessaoResponse]:
     """Lista sessões da pessoa."""
     try:
@@ -93,7 +94,10 @@ async def listar_por_pessoa(
 
 
 @router.delete("/pessoa/{id_pessoa}/todas", status_code=status.HTTP_200_OK)
-async def encerrar_todas(id_pessoa: UUID, service: SessaoService = Depends(get_sessao_service)):
+async def encerrar_todas(
+    id_pessoa: UUID = Path(..., description="ID único da pessoa (UUID)", example="550e8400-e29b-41d4-a716-446655440000"),
+    service: SessaoService = Depends(get_sessao_service)
+):
     """Remove todas as sessões da pessoa."""
     try:
         count = await service.encerrar_todas_de_pessoa(id_pessoa)

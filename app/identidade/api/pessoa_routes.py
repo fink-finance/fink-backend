@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db, get_current_user_id
@@ -45,7 +45,7 @@ async def list_pessoas(
 
 @router.get("/{id_pessoa}", response_model=PessoaResponse)
 async def get_pessoa(
-    id_pessoa: UUID,
+    id_pessoa: UUID = Path(..., description="ID único da pessoa (UUID)", example="550e8400-e29b-41d4-a716-446655440000"),
     service: PessoaService = Depends(get_pessoa_service),
     user_id: UUID = Depends(get_current_user_id),
 ) -> PessoaResponse:
@@ -82,8 +82,8 @@ async def get_pessoa_by_email(
 
 @router.patch("/{id_pessoa}", response_model=PessoaResponse)
 async def update_pessoa(
-    id_pessoa: UUID,
-    pessoa: PessoaUpdate,
+    id_pessoa: UUID = Path(..., description="ID único da pessoa (UUID)", example="550e8400-e29b-41d4-a716-446655440000"),
+    pessoa: PessoaUpdate = ...,
     service: PessoaService = Depends(get_pessoa_service),
     user_id: UUID = Depends(get_current_user_id),
 ) -> PessoaResponse:
@@ -107,7 +107,7 @@ async def update_pessoa(
 
 @router.delete("/{id_pessoa}")
 async def delete_pessoa(
-    id_pessoa: UUID,
+    id_pessoa: UUID = Path(..., description="ID único da pessoa (UUID)", example="550e8400-e29b-41d4-a716-446655440000"),
     service: PessoaService = Depends(get_pessoa_service),
     user_id: UUID = Depends(get_current_user_id),
 ):

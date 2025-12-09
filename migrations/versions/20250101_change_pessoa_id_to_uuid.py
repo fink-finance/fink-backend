@@ -19,14 +19,15 @@ depends_on = None
 
 def upgrade() -> None:
     # Alterar coluna id_pessoa na tabela pessoa de INTEGER para UUID
-    # Primeiro, remover a constraint de primary key
-    op.drop_constraint('pessoa_pkey', 'pessoa', type_='primary')
-    
-    # Remover a constraint de foreign key das tabelas relacionadas temporariamente
+    # Primeiro, remover as constraints de foreign key das tabelas relacionadas
+    # (precisa ser feito antes de dropar a primary key)
     op.drop_constraint('sessao_fk_pessoa_id_pessoa_fkey', 'sessao', type_='foreignkey')
     op.drop_constraint('meta_fk_pessoa_id_pessoa_fkey', 'meta', type_='foreignkey')
     op.drop_constraint('alerta_fk_pessoa_id_pessoa_fkey', 'alerta', type_='foreignkey')
     op.drop_constraint('assinatura_fk_pessoa_id_pessoa_fkey', 'assinatura', type_='foreignkey')
+    
+    # Agora pode remover a constraint de primary key
+    op.drop_constraint('pessoa_pkey', 'pessoa', type_='primary')
     
     # Criar uma coluna temporária UUID
     op.add_column('pessoa', sa.Column('id_pessoa_new', postgresql.UUID(as_uuid=True), nullable=True))
@@ -76,12 +77,12 @@ def upgrade() -> None:
     op.drop_column('assinatura', 'fk_pessoa_id_pessoa')
     op.drop_column('pessoa', 'id_pessoa')
     
-    # Renomear as colunas novas
-    op.rename_column('pessoa', 'id_pessoa_new', 'id_pessoa')
-    op.rename_column('sessao', 'fk_pessoa_id_pessoa_new', 'fk_pessoa_id_pessoa')
-    op.rename_column('meta', 'fk_pessoa_id_pessoa_new', 'fk_pessoa_id_pessoa')
-    op.rename_column('alerta', 'fk_pessoa_id_pessoa_new', 'fk_pessoa_id_pessoa')
-    op.rename_column('assinatura', 'fk_pessoa_id_pessoa_new', 'fk_pessoa_id_pessoa')
+    # Renomear as colunas novas usando SQL direto
+    op.execute("ALTER TABLE pessoa RENAME COLUMN id_pessoa_new TO id_pessoa")
+    op.execute("ALTER TABLE sessao RENAME COLUMN fk_pessoa_id_pessoa_new TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE meta RENAME COLUMN fk_pessoa_id_pessoa_new TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE alerta RENAME COLUMN fk_pessoa_id_pessoa_new TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE assinatura RENAME COLUMN fk_pessoa_id_pessoa_new TO fk_pessoa_id_pessoa")
     
     # Tornar as colunas NOT NULL
     op.alter_column('pessoa', 'id_pessoa', nullable=False)
@@ -188,12 +189,12 @@ def downgrade() -> None:
     op.drop_column('assinatura', 'fk_pessoa_id_pessoa')
     op.drop_column('pessoa', 'id_pessoa')
     
-    # Renomear colunas antigas
-    op.rename_column('pessoa', 'id_pessoa_old', 'id_pessoa')
-    op.rename_column('sessao', 'fk_pessoa_id_pessoa_old', 'fk_pessoa_id_pessoa')
-    op.rename_column('meta', 'fk_pessoa_id_pessoa_old', 'fk_pessoa_id_pessoa')
-    op.rename_column('alerta', 'fk_pessoa_id_pessoa_old', 'fk_pessoa_id_pessoa')
-    op.rename_column('assinatura', 'fk_pessoa_id_pessoa_old', 'fk_pessoa_id_pessoa')
+    # Renomear colunas antigas usando SQL direto
+    op.execute("ALTER TABLE pessoa RENAME COLUMN id_pessoa_old TO id_pessoa")
+    op.execute("ALTER TABLE sessao RENAME COLUMN fk_pessoa_id_pessoa_old TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE meta RENAME COLUMN fk_pessoa_id_pessoa_old TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE alerta RENAME COLUMN fk_pessoa_id_pessoa_old TO fk_pessoa_id_pessoa")
+    op.execute("ALTER TABLE assinatura RENAME COLUMN fk_pessoa_id_pessoa_old TO fk_pessoa_id_pessoa")
     
     # Tornar NOT NULL
     op.alter_column('pessoa', 'id_pessoa', nullable=False)

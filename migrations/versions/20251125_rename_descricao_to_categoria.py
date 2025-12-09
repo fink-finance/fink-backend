@@ -18,7 +18,38 @@ depends_on = None
 
 def upgrade() -> None:
     # Rename column descricao to categoria in meta table
-    op.alter_column('meta', 'descricao', new_column_name='categoria')
+    # Verifica se a coluna existe antes de tentar renomear usando SQL direto
+    conn = op.get_bind()
+    
+    # Verifica se descricao existe
+    result = conn.execute(sa.text("""
+        SELECT COUNT(*) 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'meta' 
+        AND column_name = 'descricao'
+    """))
+    descricao_count = result.scalar() if hasattr(result, 'scalar') else list(result)[0][0]
+    
+    # Verifica se categoria existe
+    result = conn.execute(sa.text("""
+        SELECT COUNT(*) 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'meta' 
+        AND column_name = 'categoria'
+    """))
+    categoria_count = result.scalar() if hasattr(result, 'scalar') else list(result)[0][0]
+    
+    if descricao_count > 0 and categoria_count == 0:
+        # Renomeia descricao para categoria
+        op.alter_column('meta', 'descricao', new_column_name='categoria')
+    elif categoria_count > 0:
+        # Coluna já foi renomeada ou sempre existiu como categoria - não faz nada
+        pass
+    else:
+        # Se nenhuma das colunas existe, cria categoria (não deveria acontecer)
+        op.add_column('meta', sa.Column('categoria', sa.String(length=500), nullable=False, server_default='Outros'))
 
 
 def downgrade() -> None:

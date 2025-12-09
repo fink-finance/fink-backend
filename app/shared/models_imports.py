@@ -25,6 +25,7 @@ def import_all_models() -> None:
     from app.identidade.persistence.pessoa_orm import PessoaORM  # noqa: F401
     from app.identidade.persistence.sessao_orm import SessaoORM  # noqa: F401
     from app.metas.persistence.meta_orm import MetaORM  # noqa: F401
+    from app.metas.persistence.movimentacao_meta_orm import MovimentacaoMetaORM  # noqa: F401
     # fmt: on
 
 

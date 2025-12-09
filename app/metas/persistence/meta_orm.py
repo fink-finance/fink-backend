@@ -14,6 +14,7 @@ from app.shared.database import Base
 if TYPE_CHECKING:
     from app.identidade.persistence.pessoa_orm import PessoaORM
     from app.alertas.persistence.alerta_orm import AlertaORM
+    from app.metas.persistence.movimentacao_meta_orm import MovimentacaoMetaORM
 
 
 class MetaORM(Base):
@@ -39,6 +40,7 @@ class MetaORM(Base):
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="metas")
     alertas: Mapped[list["AlertaORM"]] = relationship("AlertaORM", back_populates="meta", passive_deletes=True)
+    movimentacoes: Mapped[list["MovimentacaoMetaORM"]] = relationship("MovimentacaoMetaORM", back_populates="meta", passive_deletes=True)
 
     def __repr__(self) -> str:
         return f"<MetaORM id={self.id_meta} titulo={self.titulo}>"

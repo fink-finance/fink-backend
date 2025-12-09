@@ -7,14 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db, get_current_user_id
 from ..services.meta_service import MetaService
 from ..repositories.meta_repository_impl import MetaRepositoryImpl
-from .meta_schema import MetaCreate, MetaUpdate, MetaResponse
+from ..repositories.movimentacao_meta_repository_impl import MovimentacaoMetaRepositoryImpl
+from .meta_schema import MetaCreate, MetaUpdate, MetaResponse, AtualizarSaldoRequest, MovimentacaoMetaResponse
 
 router = APIRouter(tags=["metas"])
 
 
 async def get_meta_service(session: AsyncSession = Depends(get_db)) -> MetaService:
     repository = MetaRepositoryImpl(session)
-    return MetaService(repository)
+    movimentacao_repository = MovimentacaoMetaRepositoryImpl(session)
+    return MetaService(repository, movimentacao_repository)
 
 
 @router.post("/", response_model=MetaResponse, status_code=status.HTTP_201_CREATED)
@@ -115,3 +117,69 @@ async def delete_meta(
         await service.remover(id_meta)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/{id_meta}/atualizar_saldo", response_model=MetaResponse, status_code=status.HTTP_200_OK)
+async def atualizar_saldo_meta(
+    id_meta: int,
+    request: AtualizarSaldoRequest,
+    service: MetaService = Depends(get_meta_service),
+    user_id: UUID = Depends(get_current_user_id)
+) -> MetaResponse:
+    """Atualiza o saldo de uma meta financeira e registra a movimentação.
+    
+    Permite adicionar ou retirar valores do saldo atual da meta.
+    O valor é sempre tratado como positivo, independente do sinal enviado.
+    A movimentação é registrada no histórico da meta.
+    
+    **Regras:**
+    - Meta deve pertencer ao usuário autenticado
+    - Valor sempre positivo (módulo do valor enviado)
+    - Não permite saldo negativo após retirada
+    - Cria registro automático na tabela de movimentações
+    """
+    try:
+        meta_atualizada = await service.atualizar_saldo(
+            id_meta=id_meta,
+            user_id=user_id,
+            action=request.action,
+            valor=request.valor,
+            data_movimentacao=request.data,
+        )
+        return MetaResponse.model_validate(meta_atualizada.__dict__)
+    except ValueError as e:
+        if "não encontrada" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        elif "permissão" in str(e).lower() or "não tem" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/movimentacao/{id_meta}", response_model=List[MovimentacaoMetaResponse])
+async def listar_movimentacoes_meta(
+    id_meta: int,
+    service: MetaService = Depends(get_meta_service),
+    user_id: UUID = Depends(get_current_user_id)
+) -> List[MovimentacaoMetaResponse]:
+    """Lista todas as movimentações de uma meta financeira.
+    
+    Retorna o histórico completo de movimentações (adições e retiradas)
+    da meta especificada, ordenado por data (mais recente primeiro).
+    
+    **Requisitos:**
+    - Meta deve pertencer ao usuário autenticado
+    """
+    try:
+        movimentacoes = await service.listar_movimentacoes(id_meta, user_id)
+        return [
+            MovimentacaoMetaResponse.model_validate(m.__dict__)
+            for m in movimentacoes
+        ]
+    except ValueError as e:
+        if "não encontrada" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        elif "permissão" in str(e).lower() or "não tem" in str(e).lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

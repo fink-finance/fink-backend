@@ -17,7 +17,7 @@ class MetaBase(BaseModel):
     )
     categoria: Optional[Literal[
         "Emergência",
-        "Viagem",
+        "Viagem", 
         "Compras",
         # "Investimento", 
         # "Educação",
@@ -169,6 +169,88 @@ class MetaResponse(MetaBase):
                 "criada_em": "2025-11-21",
                 "termina_em": "2026-06-01",
                 "status": "em_andamento"
+            }
+        }
+    )
+
+
+class AtualizarSaldoRequest(BaseModel):
+    """Schema para atualização de saldo de meta.
+    
+    Permite adicionar ou retirar valores do saldo atual da meta,
+    registrando a movimentação no histórico.
+    """
+    action: Literal["adicionado", "retirado"] = Field(
+        ...,
+        description="Ação a ser realizada: 'adicionado' para somar ao saldo, 'retirado' para subtrair",
+        examples=["adicionado", "retirado"]
+    )
+    valor: Decimal = Field(
+        ...,
+        gt=0,
+        description="Valor da movimentação (sempre tratado como positivo, independente do sinal)",
+        examples=[100.00, 500.50, 1000.00]
+    )
+    data: date = Field(
+        ...,
+        description="Data da movimentação",
+        examples=["2025-01-15"]
+    )
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "action": "adicionado",
+                    "valor": 500.00,
+                    "data": "2025-01-15"
+                },
+                {
+                    "action": "retirado",
+                    "valor": 200.00,
+                    "data": "2025-01-20"
+                }
+            ]
+        }
+    )
+
+
+class MovimentacaoMetaResponse(BaseModel):
+    """Schema para resposta de movimentação de meta."""
+    id_movimentacao: int = Field(
+        ...,
+        gt=0,
+        description="ID único da movimentação"
+    )
+    fk_meta_id_meta: int = Field(
+        ...,
+        gt=0,
+        description="ID da meta relacionada"
+    )
+    valor: Decimal = Field(
+        ...,
+        gt=0,
+        description="Valor da movimentação"
+    )
+    acao: str = Field(
+        ...,
+        description="Ação realizada: 'adicionado' ou 'retirado'",
+        examples=["adicionado", "retirado"]
+    )
+    data: date = Field(
+        ...,
+        description="Data da movimentação"
+    )
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id_movimentacao": 1,
+                "fk_meta_id_meta": 1,
+                "valor": 500.00,
+                "acao": "adicionado",
+                "data": "2025-01-15"
             }
         }
     )

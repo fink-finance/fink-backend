@@ -10,15 +10,16 @@ from uuid import UUID
 class CategoriaMetaEnum(str, Enum):
     """Categorias permitidas para metas financeiras."""
     EMERGENCIA = "Emergência"
-    INVESTIMENTO = "Investimento"
     VIAGEM = "Viagem"
-    EDUCACAO = "Educação"
-    DIVIDAS = "Dívidas"
-    MORADIA = "Moradia"
-    VEICULO = "Veículo"
-    INTERCAMBIO = "Intercâmbio"
-    SEGURANCA = "Segurança"
-    SAUDE = "Saúde"
+    COMPRAS = "Compras"
+    # INVESTIMENTO = "Investimento"
+    # EDUCACAO = "Educação"
+    # DIVIDAS = "Dívidas"
+    # MORADIA = "Moradia"
+    # VEICULO = "Veículo"
+    # INTERCAMBIO = "Intercâmbio"
+    # SEGURANCA = "Segurança"
+    # SAUDE = "Saúde"
     OUTROS = "Outros"  # Categoria padrão
     
     @classmethod

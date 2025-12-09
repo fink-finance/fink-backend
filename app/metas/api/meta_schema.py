@@ -17,20 +17,21 @@ class MetaBase(BaseModel):
     )
     categoria: Optional[Literal[
         "Emergência",
-        "Investimento", 
-        "Viagem", 
-        "Educação",
-        "Dívidas",
-        "Moradia",
-        "Veículo",
-        "Intercâmbio",
-        "Segurança",
-        "Saúde",
+        "Viagem",
+        "Compras",
+        # "Investimento", 
+        # "Educação",
+        # "Dívidas",
+        # "Moradia",
+        # "Veículo",
+        # "Intercâmbio",
+        # "Segurança",
+        # "Saúde",
         "Outros"
     ]] = Field(
         default=None,
         description="Categoria da meta financeira (opcional, padrão: 'Outros')",
-        examples=["Investimento", "Viagem", "Educação", "Intercâmbio", "Saúde"]
+        examples=["Viagem", "Emergência", "Compras"]
     )
     valor_alvo: Decimal = Field(
         ...,

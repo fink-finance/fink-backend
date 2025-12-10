@@ -21,24 +21,74 @@ class MetaService:
         self.movimentacao_repo = movimentacao_repo
 
     # -------------------------------------------------------------------------
+    # Verificação automática de metas atrasadas
+    # -------------------------------------------------------------------------
+
+    async def _verificar_e_atualizar_status_atrasado(self, meta_orm) -> None:
+        """
+        Verifica se uma meta está atrasada e atualiza seu status automaticamente.
+        
+        Uma meta é considerada atrasada quando:
+        - A data atual é maior que a data de término (termina_em)
+        - O status atual é 'em_andamento' (não foi concluída ou cancelada)
+        
+        Args:
+            meta_orm: Objeto ORM da meta a ser verificada
+        """
+        if (
+            meta_orm.status == "em_andamento" 
+            and meta_orm.termina_em < date.today()
+        ):
+            meta_orm.status = "atrasada"
+            await self.repo.update(meta_orm)
+
+    async def _verificar_e_atualizar_lista_atrasadas(self, metas_orm: list) -> list:
+        """
+        Verifica e atualiza o status de uma lista de metas atrasadas.
+        
+        Args:
+            metas_orm: Lista de objetos ORM das metas a serem verificadas
+            
+        Returns:
+            Lista de metas ORM com status atualizado
+        """
+        for meta_orm in metas_orm:
+            await self._verificar_e_atualizar_status_atrasado(meta_orm)
+        return metas_orm
+
+    # -------------------------------------------------------------------------
     # CRUD principal
     # -------------------------------------------------------------------------
 
     async def listar_todas(self) -> list[Meta]:
-        """Lista todas as metas cadastradas (uso administrativo)."""
+        """Lista todas as metas cadastradas (uso administrativo).
+        
+        Verifica automaticamente e atualiza o status das metas atrasadas.
+        """
         metas_orm = await self.repo.list_all()
+        await self._verificar_e_atualizar_lista_atrasadas(list(metas_orm))
         return [orm_to_model(meta) for meta in metas_orm]
 
     async def listar_por_pessoa(self, id_pessoa: UUID) -> list[Meta]:
-        """Lista todas as metas vinculadas a uma pessoa."""
+        """Lista todas as metas vinculadas a uma pessoa.
+        
+        Verifica automaticamente e atualiza o status das metas atrasadas.
+        """
         metas_orm = await self.repo.list_by_pessoa(id_pessoa)
-        return [orm_to_model(meta) for meta in metas_orm] if metas_orm else []
+        if not metas_orm:
+            return []
+        await self._verificar_e_atualizar_lista_atrasadas(list(metas_orm))
+        return [orm_to_model(meta) for meta in metas_orm]
 
     async def buscar_por_id(self, id_meta: int) -> Meta:
-        """Busca uma meta específica pelo ID."""
+        """Busca uma meta específica pelo ID.
+        
+        Verifica automaticamente e atualiza o status se a meta estiver atrasada.
+        """
         meta_orm = await self.repo.get_by_id(id_meta)
         if not meta_orm:
             raise ValueError("Meta não encontrada.")
+        await self._verificar_e_atualizar_status_atrasado(meta_orm)
         return orm_to_model(meta_orm)
 
     async def criar(self, dados: dict[str, Any]) -> Meta:

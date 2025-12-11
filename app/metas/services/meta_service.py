@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.metas.domain.meta import Meta, CategoriaMetaEnum
 from app.metas.domain.movimentacao_meta import MovimentacaoMeta, AcaoMovimentacao
@@ -16,8 +17,14 @@ from app.metas.mappers.movimentacao_meta_mapper import model_to_orm_new as movim
 class MetaService:
     """Camada de regras de negócio de Meta."""
 
-    def __init__(self, repo: MetaRepository, movimentacao_repo: MovimentacaoMetaRepository | None = None):
+    def __init__(
+        self, 
+        repo: MetaRepository, 
+        movimentacao_repo: MovimentacaoMetaRepository | None = None,
+        session: AsyncSession | None = None
+    ):
         self.repo = repo
+        self.session = session
         self.movimentacao_repo = movimentacao_repo
 
     # -------------------------------------------------------------------------
@@ -145,7 +152,27 @@ class MetaService:
 
         try:
             meta_criada = await self.repo.add(nova_meta)
-            return orm_to_model(meta_criada)
+            meta_model = orm_to_model(meta_criada)
+            
+            # Cria alerta automaticamente quando meta é criada
+            if self.session:
+                try:
+                    from app.alertas.services.alerta_service import AlertaService
+                    alerta_service = AlertaService(None)  # Não precisa de repo para criar_alerta_automatico
+                    msg = f"Uma nova meta '{meta_model.categoria}' foi criada! Acesse agora."
+                    await alerta_service.criar_alerta_automatico(
+                        data=meta_model.criada_em,
+                        conteudo=msg,
+                        user_id=meta_model.fk_pessoa_id_pessoa,
+                        session=self.session
+                    )
+                except Exception as e:
+                    # Loga o erro mas não falha a criação da meta se o alerta falhar
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Erro ao criar alerta automático após criação de meta: {e}")
+            
+            return meta_model
         except IntegrityError as e:
             raise ValueError(f"Erro de integridade ao salvar meta: {e}")
         except Exception as e:
@@ -314,6 +341,30 @@ class MetaService:
             )
             movimentacao_orm = movimentacao_model_to_orm(movimentacao)
             await self.movimentacao_repo.add(movimentacao_orm)
+            
+            # Cria alerta automaticamente quando movimentação é criada
+            if self.session:
+                try:
+                    from app.alertas.services.alerta_service import AlertaService
+                    alerta_service = AlertaService(None)  # Não precisa de repo para criar_alerta_automatico
+
+                    if action == AcaoMovimentacao.ADICIONADO.value:
+                        msg = f"Você adicionou {valor_normalizado} a sua meta de {meta.categoria}."
+                    else:
+                        msg = f"Você retirou {valor_normalizado} da sua meta de {meta.categoria}."
+
+                    await alerta_service.criar_alerta_automatico(
+                        data=data_movimentacao,
+                        conteudo=msg,
+                        user_id=user_id,
+                        session=self.session
+                    )
+
+                except Exception as e:
+                    # Loga o erro mas não falha a criação da movimentação se o alerta falhar
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Erro ao criar alerta automático após movimentação: {e}")
             
             return orm_to_model(meta_atualizada_orm)
         except IntegrityError as e:

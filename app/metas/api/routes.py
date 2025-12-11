@@ -16,7 +16,7 @@ router = APIRouter(tags=["metas"])
 async def get_meta_service(session: AsyncSession = Depends(get_db)) -> MetaService:
     repository = MetaRepositoryImpl(session)
     movimentacao_repository = MovimentacaoMetaRepositoryImpl(session)
-    return MetaService(repository, movimentacao_repository)
+    return MetaService(repository, movimentacao_repository, session)
 
 
 @router.post("/", response_model=MetaResponse, status_code=status.HTTP_201_CREATED)

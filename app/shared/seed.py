@@ -13,7 +13,6 @@ from app.shared.database import async_session_maker  # ajusta o nome se for dife
 from app.identidade.persistence.pessoa_orm import PessoaORM
 from app.identidade.persistence.sessao_orm import SessaoORM  # se não usar, pode remover
 from app.metas.persistence.meta_orm import MetaORM
-from app.alertas.persistence.alerta_orm import AlertaORM
 from app.comercial.persistence.plano_orm import PlanoORM
 from app.comercial.persistence.assinatura_orm import AssinaturaORM
 from app.comercial.persistence.tipo_pagamento_orm import TipoPagamentoORM
@@ -35,7 +34,6 @@ async def seed_db() -> None:
         meta_demos = await seed_metas_demo(session, pessoa_demo)
         assinatura_demo = await seed_assinatura_demo(session, pessoa_demo)
         await seed_solicitacao_pagamento_demo(session, assinatura_demo)
-        await seed_alertas_demo(session, pessoa_demo, meta_demos)
     print("[SEED] Seed finalizado com sucesso!")
 
 
@@ -302,87 +300,3 @@ async def seed_solicitacao_pagamento_demo(
     print("[SEED] Solicitação de pagamento demo criada")
 
 
-# --------------------------- ALERTA ---------------------------
-
-
-async def seed_alertas_demo(
-    session: AsyncSession,
-    pessoa: PessoaORM,
-    metas: list[MetaORM],
-) -> None:
-    """
-    Cria múltiplos alertas para a pessoa demo e suas metas (dados já foram limpos anteriormente).
-
-    Exemplos de alertas:
-    - progresso_meta >= 80% (para todas as metas)
-    - progresso_meta >= 100% (meta concluída)
-    - dias_para_termino <= 7 (alerta de prazo curto)
-    """
-    alertas_count = 0
-    
-    for meta in metas:
-        # 1) Alerta de meta quase concluída (80%)
-        alertas_count += await _create_alert(
-            session=session,
-            pessoa_id=pessoa.id_pessoa,
-            meta_id=meta.id_meta,
-            parametro="progresso_meta",
-            acao="maior_ou_igual_que",
-            valor=80.0,
-        )
-
-        # 2) Alerta de meta concluída (100%)
-        alertas_count += await _create_alert(
-            session=session,
-            pessoa_id=pessoa.id_pessoa,
-            meta_id=meta.id_meta,
-            parametro="progresso_meta",
-            acao="maior_ou_igual_que",
-            valor=100.0,
-        )
-
-        # 3) Alerta de prazo curto (7 dias para terminar)
-        alertas_count += await _create_alert(
-            session=session,
-            pessoa_id=pessoa.id_pessoa,
-            meta_id=meta.id_meta,
-            parametro="dias_para_termino",
-            acao="menor_ou_igual_que",
-            valor=7.0,
-        )
-
-    # Exemplo de alerta global (sem meta específica): saldo geral muito baixo
-    alertas_count += await _create_alert(
-        session=session,
-        pessoa_id=pessoa.id_pessoa,
-        meta_id=None,
-        parametro="saldo_geral",
-        acao="menor_ou_igual_que",
-        valor=100.0,
-    )
-    
-    print(f"[SEED] {alertas_count} alertas demo criados")
-
-
-async def _create_alert(
-    session: AsyncSession,
-    pessoa_id: UUID,
-    meta_id: int | None,
-    parametro: str,
-    acao: str,
-    valor: float,
-) -> int:
-    """
-    Cria um alerta com os parâmetros dados.
-    Retorna 1 para contabilizar o alerta criado.
-    """
-    alerta = AlertaORM(
-        fk_pessoa_id_pessoa=pessoa_id,
-        fk_meta_id_meta=meta_id,
-        parametro=parametro,
-        acao=acao,
-        valor=valor,
-    )
-    session.add(alerta)
-    await session.commit()
-    return 1

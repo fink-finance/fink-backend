@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,16 +19,11 @@ class AlertaORM(Base):
         PostgresUUID(as_uuid=True), ForeignKey("pessoa.id_pessoa", ondelete="CASCADE"), nullable=False
     )
 
-    parametro: Mapped[str] = mapped_column(String, nullable=False)
-    acao: Mapped[str] = mapped_column(String, nullable=False)
-    valor: Mapped[float] = mapped_column(Float, nullable=False)
-
-    fk_meta_id_meta: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("meta.id_meta", ondelete="SET NULL"), nullable=True
-    )
+    data: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    conteudo: Mapped[str] = mapped_column(String, nullable=False)
+    lida: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     pessoa: Mapped["PessoaORM"] = relationship("PessoaORM", back_populates="alertas")
-    meta: Mapped["MetaORM | None"] = relationship("MetaORM", back_populates="alertas")
 
     def __repr__(self) -> str:
-        return f"<AlertaORM id={self.id_alerta} parametro={self.parametro} acao={self.acao} valor={self.valor}>"
+        return f"<AlertaORM id={self.id_alerta} conteudo={self.conteudo[:30]}... lida={self.lida}>"

@@ -161,7 +161,7 @@ class MetaService:
                     alerta_service = AlertaService(None)  # Não precisa de repo para criar_alerta_automatico
                     msg = f"Uma nova meta '{meta_model.categoria}' foi criada! Acesse agora."
                     await alerta_service.criar_alerta_automatico(
-                        data=meta_model.criada_em,
+                        # data=meta_model.criada_em,
                         conteudo=msg,
                         user_id=meta_model.fk_pessoa_id_pessoa,
                         session=self.session
@@ -354,7 +354,7 @@ class MetaService:
                         msg = f"Você retirou {valor_normalizado} da sua meta de {meta.categoria}."
 
                     await alerta_service.criar_alerta_automatico(
-                        data=data_movimentacao,
+                        # data=data_movimentacao,
                         conteudo=msg,
                         user_id=user_id,
                         session=self.session

@@ -349,9 +349,9 @@ class MetaService:
                     alerta_service = AlertaService(None)  # Não precisa de repo para criar_alerta_automatico
 
                     if action == AcaoMovimentacao.ADICIONADO.value:
-                        msg = f"Você adicionou {valor_normalizado} a sua meta de {meta.categoria}."
+                        msg = f"Você adicionou R$ {valor_normalizado} a sua meta de {meta.categoria}."
                     else:
-                        msg = f"Você retirou {valor_normalizado} da sua meta de {meta.categoria}."
+                        msg = f"Você retirou R$ {valor_normalizado} da sua meta de {meta.categoria}."
 
                     await alerta_service.criar_alerta_automatico(
                         # data=data_movimentacao,

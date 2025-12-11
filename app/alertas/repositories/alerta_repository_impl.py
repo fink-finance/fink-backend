@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -20,13 +21,12 @@ class AlertaRepositoryImpl(AlertaRepository):
         return await self.session.get(AlertaORM, id_alerta)
 
     async def list_by_pessoa(self, id_pessoa: UUID) -> list[AlertaORM]:
-        """Lista todos os alertas de uma pessoa específica."""
-        result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa))
-        return list(result.scalars())
-
-    async def list_by_meta(self, id_meta: int) -> list[AlertaORM]:
-        """Lista todos os alertas relacionados a uma meta."""
-        result = await self.session.execute(select(AlertaORM).where(AlertaORM.fk_meta_id_meta == id_meta))
+        """Lista todos os alertas não lidos de uma pessoa específica."""
+        result = await self.session.execute(
+            select(AlertaORM)
+            .where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa)
+            .where(AlertaORM.lida == False)
+        )
         return list(result.scalars())
 
     async def list_all(self) -> list[AlertaORM]:
@@ -52,3 +52,14 @@ class AlertaRepositoryImpl(AlertaRepository):
         """Remove um alerta pelo ID."""
         await self.session.execute(delete(AlertaORM).where(AlertaORM.id_alerta == id_alerta))
         await self.session.commit()
+
+    async def delete_old_alertas(self, id_pessoa: UUID, older_than: datetime) -> int:
+        """Remove alertas antigos de uma pessoa específica."""
+        stmt = (
+            delete(AlertaORM)
+            .where(AlertaORM.fk_pessoa_id_pessoa == id_pessoa)
+            .where(AlertaORM.data < older_than)
+        )
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        return result.rowcount or 0
